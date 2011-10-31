@@ -32,6 +32,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import chatServer.DisplayMessage;
 
 // extend JFrame so that we can use JFrame methods easily
 public class Server extends JFrame
@@ -46,7 +47,9 @@ public class Server extends JFrame
 	// create a JTextArea for the programs console
 	private JTextArea textarea = new JTextArea();
 	
-	Socket socket;
+	private DisplayMessage DisplayMessage = new DisplayMessage(textarea);
+	
+	private Socket socket;
 
 	// pass the port to the private method listen
 	public Server( int port ) throws IOException {
@@ -67,14 +70,14 @@ public class Server extends JFrame
 
 			public void windowClosing(WindowEvent winEvt) {
 				
+				sendToAll("The chat server has shut down");
+				
 				try {
-					socket.close();
+					serversocket.close();
 				} catch (IOException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				System.exit(0);
+					System.exit(0);
 			}
 		});
 
@@ -115,13 +118,13 @@ public class Server extends JFrame
 			// create the serversocket on the specified port
 			serversocket = new ServerSocket( port );
 		} catch (IOException e) {
-			displayMessage("Error reserving port");
+			DisplayMessage.PrintMessage("Error reserving port");
 			e.printStackTrace();
 
 		}
 
 		// display to the console  what port its listening on
-		displayMessage("Listening on "+serversocket);
+		DisplayMessage.PrintMessage("Listening on "+serversocket);
 
 		// accept connections forever
 		while (true) {
@@ -130,7 +133,7 @@ public class Server extends JFrame
 			socket = serversocket.accept();
 
 			// tell the console that a client connected
-			displayMessage("Connected to "+ socket.getInetAddress().getHostName());
+			DisplayMessage.PrintMessage("Connected to "+ socket.getInetAddress().getHostName());
 
 			// create a output stream to communicate with the client
 			DataOutputStream output = new DataOutputStream(socket.getOutputStream());
@@ -151,14 +154,14 @@ public class Server extends JFrame
 	}
 
 	// return everything in the hashtable
-	Enumeration getOutputStreams() {
+	private Enumeration getOutputStreams() {
 		return hashtable.elements();
 	}
 	// take the passed message and send it to all clients
 	void sendToAll( String message ) {
 
 		// piggyback off this method to display it to the console
-		displayMessage(message);
+		DisplayMessage.PrintMessage(message);
 
 
 		// don't send any messages that start with a /
@@ -176,7 +179,7 @@ public class Server extends JFrame
 						// send the message to the client
 						output.writeUTF( message );
 					} catch( IOException ie ) {
-						displayMessage("Error sending message" + ie); 
+						DisplayMessage.PrintMessage("Error sending message" + ie); 
 					}
 				}
 			}
@@ -190,7 +193,7 @@ public class Server extends JFrame
 		synchronized(hashtable) {
 
 			// print to the console that its removing the connection
-			displayMessage("Removing connection to " + socket.getInetAddress().getHostName());
+			DisplayMessage.PrintMessage("Removing connection to " + socket.getInetAddress().getHostName());
 
 			// remove the socket from the hashtable so that data doesn't get sent to it
 			hashtable.remove(socket);
@@ -199,27 +202,10 @@ public class Server extends JFrame
 				// close the socket
 				socket.close();
 			} catch( IOException ie ) {
-				displayMessage("Error closing " + socket.getInetAddress().getHostName());
+				DisplayMessage.PrintMessage("Error closing " + socket.getInetAddress().getHostName());
 				ie.printStackTrace();
 			}
 		}
-	}
-
-	// displays the message to the servers console
-	private void displayMessage(String message) {
-
-		// remove accidental spaces before and after message
-		message.trim();
-
-		message = message + "\n";
-
-		// displays the message to the textarea
-		textarea.append(message);
-
-		// autoscroll the textarea
-		textarea.setCaretPosition(textarea.getDocument().getLength());
-
-
 	}
 
 	// main method thats run first
@@ -240,8 +226,6 @@ public class Server extends JFrame
 
 		// when the exit button is pressed tell JFrame to close
 		//		application.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		
-		
 
 	}
 	
@@ -257,6 +241,7 @@ public class Server extends JFrame
 			contentType = 1;
 			this.senderID = senderID;
 			this.messageText = messageText;
+			
 		}
 		
 		public void setUsername(int senderID, String username) {

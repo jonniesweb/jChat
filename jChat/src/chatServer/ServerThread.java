@@ -21,8 +21,7 @@ import java.io.IOException;
 import java.net.Socket;
 
 // extend thread so that this class can be threaded
-public class ServerThread extends Thread
-{
+public class ServerThread extends Thread {
 	// define server from Server.java
 	private Server server;
 
