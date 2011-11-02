@@ -55,19 +55,6 @@ public class EnterDialog extends JDialog {
 
 	public EnterDialog() {
 		
-		// give the window a windows look and feel
-		try {
-			UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
-		}
-		
 		// set up the contentpane and window
 		getContentPane().setBackground(new Color(77, 77, 77));
 		getContentPane().setForeground(new Color(180, 180, 180));
