@@ -55,8 +55,8 @@ public class Server extends JFrame
 	// pass the port to the private method listen
 	public Server( int port ) throws IOException {
 
-		// set the window name
-		super("jChatServer");
+		// call the superclass constructor and pass it the window title we want to give
+		super("jChatServer - Created by Jonnie Simpson");
 
 		// confgure JFrame
 		setBackground(new Color(99, 99, 99));
