@@ -28,8 +28,6 @@ import javax.swing.JLabel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 // extend JDialog so that we can easily call JDialog methods
 public class EnterDialog extends JDialog {
@@ -127,7 +125,7 @@ public class EnterDialog extends JDialog {
 
 				// fill these variables in from the textfields
 				String ipaddress = ipAddressField.getText();
-				String password = pwdAljgfhsoitbdfogrntgv.getText();
+				String password = pwdAljgfhsoitbdfogrntgv.getText(); // use getText method even though its depreciated for simplicity
 				
 				// hash the given password
 				int hashpass = password.hashCode();

@@ -7,11 +7,21 @@ import javax.swing.JTextField;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.JPanel;
 
 public class InputBox extends JDialog {
-	private JTextField textField;
 
-	public InputBox() {
+	private JTextField textField;
+	private JLabel lblBodyText;
+	private JButton btnSubmit;
+	private JPanel panel;
+	private JButton btnCancel;
+
+	public InputBox(ActionListener submitListener, ActionListener cancelListener) {
+
+		setTitle("JChat");
 
 		setAlwaysOnTop(true);
 		GridBagLayout gridBagLayout = new GridBagLayout();
@@ -21,12 +31,12 @@ public class InputBox extends JDialog {
 		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		getContentPane().setLayout(gridBagLayout);
 
-		JLabel lblDefaultText = new JLabel("default text");
+		lblBodyText = new JLabel("");
 		GridBagConstraints gbc_lblDefaultText = new GridBagConstraints();
 		gbc_lblDefaultText.insets = new Insets(0, 0, 5, 0);
 		gbc_lblDefaultText.gridx = 0;
 		gbc_lblDefaultText.gridy = 0;
-		getContentPane().add(lblDefaultText, gbc_lblDefaultText);
+		getContentPane().add(lblBodyText, gbc_lblDefaultText);
 
 		textField = new JTextField();
 		GridBagConstraints gbc_textField = new GridBagConstraints();
@@ -37,21 +47,66 @@ public class InputBox extends JDialog {
 		getContentPane().add(textField, gbc_textField);
 		textField.setColumns(10);
 
-		JButton btnSubmit = new JButton("Submit");
-		GridBagConstraints gbc_btnSubmit = new GridBagConstraints();
-		gbc_btnSubmit.gridx = 0;
-		gbc_btnSubmit.gridy = 2;
-		getContentPane().add(btnSubmit, gbc_btnSubmit);
+		panel = new JPanel();
+		GridBagConstraints gbc_panel = new GridBagConstraints();
+		gbc_panel.fill = GridBagConstraints.BOTH;
+		gbc_panel.gridx = 0;
+		gbc_panel.gridy = 2;
+		getContentPane().add(panel, gbc_panel);
+
+		btnSubmit = new JButton("Submit");
+		panel.add(btnSubmit);
+
+		btnCancel = new JButton("Cancel");
+		panel.add(btnCancel);
+		
+		setSize(400, 125);
+		setVisible(true);
 	}
 
-	public static void main(String[] args) {
+	public JDialog createDialog(ActionListener submitListener, ActionListener cancelListener) {
 
+		btnSubmit.addActionListener(submitListener);
+		
+		// if no ActionListener is added, default cancel to disposing of the window
+		if (btnCancel == null) {
+			btnCancel.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					dispose(); 
+				}
+			});
+			
+		} else {
+			btnCancel.addActionListener(cancelListener);
+		}
+
+		
+		return this;
+	}
+
+	// set body text
+	public void setBodyText(String description) {
+		lblBodyText.setText(description);
+	}
+
+	// set window title
+	public void setWindowTitle(String windowTitle) {
+		setTitle(windowTitle);
 	}
 	
-	public InputBox(String windowName, String description) {
-		
-		
-		
+	// set Submit Buttons text
+	public void setButtonText(String buttonText) {
+		btnSubmit.setText(buttonText);
 	}
 
+	// returns the text contained in the Text Field
+	public String getTextField() {
+		return textField.getText();
+	}
+	
+	// method to close the window if it isn't done by the ActionListener
+	public void disposeWindow() {
+		dispose();
+	}
 }
