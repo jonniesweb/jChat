@@ -19,7 +19,7 @@ public class InputBox extends JDialog {
 	private JPanel panel;
 	private JButton btnCancel;
 
-	public InputBox(ActionListener submitListener, ActionListener cancelListener) {
+	public InputBox() {
 
 		setTitle("JChat");
 
@@ -30,6 +30,8 @@ public class InputBox extends JDialog {
 		gridBagLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
 		gridBagLayout.rowWeights = new double[]{0.0, 0.0, 0.0, Double.MIN_VALUE};
 		getContentPane().setLayout(gridBagLayout);
+		
+		setBounds(100, 100, 0, 0);
 
 		lblBodyText = new JLabel("");
 		GridBagConstraints gbc_lblDefaultText = new GridBagConstraints();
@@ -69,7 +71,7 @@ public class InputBox extends JDialog {
 		btnSubmit.addActionListener(submitListener);
 		
 		// if no ActionListener is added, default cancel to disposing of the window
-		if (btnCancel == null) {
+		if (btnCancel.getAction() == null) {
 			btnCancel.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
