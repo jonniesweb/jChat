@@ -76,6 +76,8 @@ public class Client extends JFrame implements Runnable {
 	private final JMenuItem mntmExit = new JMenuItem("Exit");
 	private final JMenuItem mntmChangeUsername = new JMenuItem(
 			"Change Username...");
+	private final JMenu mnMiscellaneous = new JMenu("Miscellaneous");
+	private final JMenuItem mntmPlayUt = new JMenuItem("Play UT2003");
 
 	public Client(String host) {
 		// call the superclass constructor and pass it the window title we want
@@ -100,6 +102,7 @@ public class Client extends JFrame implements Runnable {
 		textfield.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		textfield.setForeground(new Color(180, 180, 180));
 		textfield.setBackground(new Color(65, 65, 65));
+		setBounds(100, 100, 0, 0);
 
 		// set up the textpane
 		textpane.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -139,13 +142,24 @@ public class Client extends JFrame implements Runnable {
 				
 			}
 		};
+		
+		
+		// TODO: localize inputBox to actionlistener and use getSource() method to get object
+		
+		
+		
+		
+		
+		
+		
 
 		// menu item change username action listener
 		mntmChangeUsername.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				inputBox = new InputBox(actionUsernameSubmit, null); // TODO: add a cancel action listener if necessary
+				inputBox = new InputBox();
 				inputBox.setBodyText("Please enter your new username");
+				inputBox.createDialog(actionUsernameSubmit, null);
 				
 			}
 		});
@@ -153,6 +167,22 @@ public class Client extends JFrame implements Runnable {
 		mnFile.add(mntmChangeUsername);
 
 		mnFile.add(mntmExit);
+		
+		menuBar.add(mnMiscellaneous);
+		mntmPlayUt.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				
+				String cmd = "C:\\Program Files\\aProgram\\test.exe -login joeSmith password1";
+				Runtime run = Runtime.getRuntime();
+				try {
+					Process proc = run.exec(cmd);
+				} catch (IOException e1) {
+					displayMessage("Unable to start UT2003");
+				}
+			}
+		});
+		
+		mnMiscellaneous.add(mntmPlayUt);
 
 		// show the window
 		setVisible(true);
