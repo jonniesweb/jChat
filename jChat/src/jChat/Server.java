@@ -100,6 +100,7 @@ public class Server extends JFrame
 		getContentPane().add(panel, BorderLayout.NORTH);
 		panel.setForeground(new Color(180, 180, 180));
 		panel.setBackground(new Color(77, 77, 77));
+		setBounds(100, 100, 0, 0);
 
 		// set up the JLabel for the header text
 		JLabel lblJchatserverBy = new JLabel("jChatServer - By Jonnie Simpson");
