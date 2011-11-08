@@ -46,10 +46,10 @@ import javax.swing.text.StyledDocument;
 // implement Runnable so that we can have threaded methods
 public class Client extends JFrame implements Runnable {
 	// define some Swing components
-	JPanel panel = new JPanel();
-	JScrollPane scrollPane = new JScrollPane();
-	JTextField textfield = new JTextField();
-	InputBox inputBox;
+	private JPanel panel = new JPanel();
+	private JScrollPane scrollPane = new JScrollPane();
+	private JTextField textfield = new JTextField();
+	private InputBox inputBox;
 
 	// define socket connecting to the server
 	private Socket socket;
@@ -59,25 +59,24 @@ public class Client extends JFrame implements Runnable {
 	private DataInputStream input;
 
 	// create a random number between 0 and 100 to create a random username
-	Random randomgenerator = new Random();
-	int rndid = randomgenerator.nextInt(101);
+	private Random randomgenerator = new Random();
+	private int rndid = randomgenerator.nextInt(101);
 	private String userid = Integer.toString(rndid);
 	private String prevmessage = "";
 
 	// create a default font for the console
-	Font font = new Font("Arial", Font.PLAIN, 12);
-	StyleContext context = new StyleContext();
+	private Font font = new Font("Arial", Font.PLAIN, 12);
+	private StyleContext context = new StyleContext();
 
 	// create a styled document for the jtextpane
-	StyledDocument document = new DefaultStyledDocument();
-	JTextPane textpane = new JTextPane(document);
+	private StyledDocument document = new DefaultStyledDocument();
+	private JTextPane textpane = new JTextPane(document);
 	private final JMenuBar menuBar = new JMenuBar();
 	private final JMenu mnFile = new JMenu("File");
 	private final JMenuItem mntmExit = new JMenuItem("Exit");
-	private final JMenuItem mntmChangeUsername = new JMenuItem(
-			"Change Username...");
+	private final JMenuItem mntmChangeUsername = new JMenuItem("Change Username...");
 	private final JMenu mnMiscellaneous = new JMenu("Miscellaneous");
-	private final JMenuItem mntmPlayUt = new JMenuItem("Play UT2003");
+	private final JMenuItem mntmPlayUt = new JMenuItem("Play UT2004");
 
 	public Client(String host) {
 		// call the superclass constructor and pass it the window title we want
@@ -87,6 +86,7 @@ public class Client extends JFrame implements Runnable {
 		// when the user enters information in the text box and presses enter
 		// the message is passed to processMessage
 		textfield.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent e) {
 				processMessage(e.getActionCommand());
 			}
@@ -129,6 +129,7 @@ public class Client extends JFrame implements Runnable {
 		// menu option "exit" action listener
 		menuBar.add(mnFile);
 		mntmExit.addActionListener(new ActionListener() {
+			@Override
 			public void actionPerformed(ActionEvent arg0) {
 				System.exit(0);
 			}
@@ -137,21 +138,11 @@ public class Client extends JFrame implements Runnable {
 		final ActionListener actionUsernameSubmit = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				String username = inputBox.getTextField();
+				 userid = inputBox.getTextField();
 				inputBox.dispose();
 				
 			}
 		};
-		
-		
-		// TODO: localize inputBox to actionlistener and use getSource() method to get object
-		
-		
-		
-		
-		
-		
-		
 
 		// menu item change username action listener
 		mntmChangeUsername.addActionListener(new ActionListener() {
@@ -169,15 +160,22 @@ public class Client extends JFrame implements Runnable {
 		mnFile.add(mntmExit);
 		
 		menuBar.add(mnMiscellaneous);
+		
+		// If the client machine is one belonging to Humberview they
+		// have the ability to play UT2004
 		mntmPlayUt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				
-				String cmd = "C:\\Program Files\\aProgram\\test.exe -login joeSmith password1";
+				// start in windowed because I'm fly like that
+				String cmd = "M:\\circus_4\\byp\\System\\UT2004.exe -windowed";
 				Runtime run = Runtime.getRuntime();
 				try {
-					Process proc = run.exec(cmd);
+					run.exec(cmd);
+					
+					// If the computer isn't able to locate/start the program, 
+					// print an error to the screen
 				} catch (IOException e1) {
-					displayMessage("Unable to start UT2003");
+					displayMessage("Unable to start UT2004");
 				}
 			}
 		});
@@ -357,11 +355,10 @@ public class Client extends JFrame implements Runnable {
 		textpane.setCaretPosition(textpane.getDocument().getLength());
 	}
 
-	// main method (doesn't run because method Server is called from
-	// EnterDialog.java)
-	public static void main(String ipaddress, String password, String args[]) {
+	// main method for testing purposes - normally never called
+	public static void main(String[] args) {
 
-		new Client("127.0.0.1");
+		new Client("localhost");
 
 	}
 }
