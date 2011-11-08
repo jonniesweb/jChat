@@ -69,6 +69,7 @@ public class InputBox extends JDialog {
 	public JDialog createDialog(ActionListener submitListener, ActionListener cancelListener) {
 
 		btnSubmit.addActionListener(submitListener);
+		textField.addActionListener(submitListener);
 		
 		// if no ActionListener is added, default cancel to disposing of the window
 		if (btnCancel.getAction() == null) {
