@@ -90,7 +90,7 @@ public class EnterDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 
 				// start the client
-				Client application = new Client(ipAddressField.getText());
+				new Client(ipAddressField.getText());
 
 				// hide and get rid of the window
 				dispose();
