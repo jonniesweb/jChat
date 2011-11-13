@@ -15,9 +15,9 @@
 package jChat;
 
 // various imports
-import java.io.DataInputStream;
 import java.io.EOFException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.net.Socket;
 
 // extend thread so that this class can be threaded
@@ -44,7 +44,7 @@ public class ServerThread extends Thread {
 		try {
 
 			// create a datainputstream so that we can receive the data from the client
-			DataInputStream input = new DataInputStream( socket.getInputStream() );
+			ObjectInputStream input = new ObjectInputStream( socket.getInputStream() );
 
 			// loop forever, until the client disconnects
 			while (true) {

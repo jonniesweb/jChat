@@ -21,9 +21,9 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Random;
 
@@ -55,8 +55,8 @@ public class Client extends JFrame implements Runnable {
 	private Socket socket;
 
 	// define streams to communicate with the server
-	private DataOutputStream output;
-	private DataInputStream input;
+	private ObjectOutputStream output;
+	private ObjectInputStream input;
 
 	// create a random number between 0 and 100 to create a random username
 	private Random randomgenerator = new Random();
@@ -196,8 +196,8 @@ public class Client extends JFrame implements Runnable {
 
 			// create the input and output streams to communicate with the
 			// server
-			input = new DataInputStream(socket.getInputStream());
-			output = new DataOutputStream(socket.getOutputStream());
+			input = new ObjectInputStream(socket.getInputStream());
+			output = new ObjectOutputStream(socket.getOutputStream());
 
 			// start this thread in the background
 			new Thread(this).start();

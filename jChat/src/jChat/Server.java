@@ -15,10 +15,9 @@ package jChat;
 
 // various imports
 import jChat.DisplayMessage;
-
 import java.awt.BorderLayout;
 import java.awt.Container;
-import java.io.DataOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.ServerSocket;
@@ -32,7 +31,6 @@ import javax.swing.JPanel;
 import javax.swing.JLabel;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 // extend JFrame so that we can use JFrame methods easily
@@ -43,7 +41,7 @@ public class Server extends JFrame
 
 	// define a new hashtable
 	// if it messes up, remove arguments
-	private Hashtable<Socket, DataOutputStream> hashtable = new Hashtable<Socket, DataOutputStream>();
+	private Hashtable<Socket, ObjectOutputStream> hashtable = new Hashtable<Socket, ObjectOutputStream>();
 
 	// create a JTextArea for the programs console
 	private JTextArea textarea = new JTextArea();
@@ -138,7 +136,7 @@ public class Server extends JFrame
 			DisplayMessage.PrintMessage("Connected to "+ socket.getInetAddress().getHostName());
 
 			// create a output stream to communicate with the client
-			DataOutputStream output = new DataOutputStream(socket.getOutputStream());
+			ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 
 			// send necessary headers
 			output.flush();
@@ -175,7 +173,7 @@ public class Server extends JFrame
 				for (Enumeration enumeration = getOutputStreams(); enumeration.hasMoreElements(); )
 				{
 					// get the output stream for the socket in the hashtable
-					DataOutputStream output = (DataOutputStream)enumeration.nextElement();
+					ObjectOutputStream output = (ObjectOutputStream)enumeration.nextElement();
 
 					try {
 						// send the message to the client
