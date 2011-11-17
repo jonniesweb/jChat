@@ -8,19 +8,19 @@ public class ContentContainer implements Serializable {
 	private int senderID = 0; // the unique id that clients have. could be used as a passphrase to distinguish users
 	private String messageText = "test!"; // plain message text
 	private static final String programVer = "1.0"; // program version to alert users of a newer version
+	private String username = "";
 	
 	public ContentContainer(int senderID) {
 		this.senderID = senderID;
 	}
 
-	public void setMessage(int senderID, String messageText) {
+	public void setMessage(String messageText) {
 		contentType = 1;
 		this.messageText = messageText;
 	}
 	
-	public void setUsername(int senderID, String username) {
-		contentType = 2;
-		messageText = username;
+	public void setUsername(String username) {
+		this.username = username;
 	}
 	
 	public String getMessageText() {
@@ -31,7 +31,7 @@ public class ContentContainer implements Serializable {
 		return senderID;
 	}
 	public String getUsername() {
-		return messageText;
+		return username;
 	}
 	
 	public int getContentType() {

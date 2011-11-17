@@ -15,7 +15,6 @@ package jChat;
 
 // Various imports
 import java.awt.BorderLayout;
-import java.awt.Button;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Font;
@@ -26,7 +25,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Random;
-
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -39,7 +37,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
-import javax.swing.text.StyleContext;
 import javax.swing.text.StyledDocument;
 
 // extend JFrame so that we can access its methods
@@ -50,6 +47,8 @@ public class Client extends JFrame implements Runnable {
 	private JScrollPane scrollPane = new JScrollPane();
 	private JTextField textfield = new JTextField();
 	private InputBox inputBox;
+	
+
 
 	// define socket connecting to the server
 	private Socket socket;
@@ -61,23 +60,22 @@ public class Client extends JFrame implements Runnable {
 	// create a random number between 0 and 100 to create a random username
 	private Random randomgenerator = new Random();
 	private int rndid = randomgenerator.nextInt(101);
-	private String userid = Integer.toString(rndid);
-	private String prevmessage = "";
-
-	// create a default font for the console
-	private Font font = new Font("Arial", Font.PLAIN, 12);
-	private StyleContext context = new StyleContext();
+	private String username = Integer.toString(rndid);
 
 	// create a styled document for the jtextpane
 	private StyledDocument document = new DefaultStyledDocument();
-	private JTextPane textpane = new JTextPane(document);
+	private JTextPane textPane = new JTextPane(document);
 	private final JMenuBar menuBar = new JMenuBar();
 	private final JMenu mnFile = new JMenu("File");
 	private final JMenuItem mntmExit = new JMenuItem("Exit");
 	private final JMenuItem mntmChangeUsername = new JMenuItem("Change Username...");
 	private final JMenu mnMiscellaneous = new JMenu("Miscellaneous");
 	private final JMenuItem mntmPlayUt = new JMenuItem("Play UT2004");
-
+	
+	// define DisplayMessage to handle object messages
+	private DisplayMessage displayMessage = new DisplayMessage(textPane, document);
+	
+	
 	public Client(String host) {
 		// call the superclass constructor and pass it the window title we want
 		// to give
@@ -105,13 +103,13 @@ public class Client extends JFrame implements Runnable {
 		setBounds(100, 100, 0, 0);
 
 		// set up the textpane
-		textpane.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-		textpane.setForeground(new Color(180, 180, 180));
-		textpane.setBackground(new Color(65, 65, 65));
-		textpane.setEditable(false);
+		textPane.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+		textPane.setForeground(new Color(180, 180, 180));
+		textPane.setBackground(new Color(65, 65, 65));
+		textPane.setEditable(false);
 
 		// put the textpane in the scrollpane
-		scrollPane.setViewportView(textpane);
+		scrollPane.setViewportView(textPane);
 
 		// set up the panel
 		panel.setForeground(new Color(180, 180, 180));
@@ -138,7 +136,7 @@ public class Client extends JFrame implements Runnable {
 		final ActionListener actionUsernameSubmit = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				 userid = inputBox.getTextField();
+				 username = inputBox.getTextField();
 				inputBox.dispose();
 				
 			}
@@ -175,7 +173,7 @@ public class Client extends JFrame implements Runnable {
 					// If the computer isn't able to locate/start the program, 
 					// print an error to the screen
 				} catch (IOException e1) {
-					displayMessage("Unable to start UT2004");
+					displayMessage.PrintMessage("Unable to start UT2004");
 				}
 			}
 		});
@@ -190,7 +188,7 @@ public class Client extends JFrame implements Runnable {
 			// Initiate the connection
 			socket = new Socket(host, 1337);
 			// If connected tell the user it was successful
-			displayMessage("Connected to: "
+			displayMessage.PrintMessage("Connected to: "
 					+ socket.getInetAddress().getHostName() + " on port: "
 					+ socket.getPort());
 
@@ -203,7 +201,7 @@ public class Client extends JFrame implements Runnable {
 			new Thread(this).start();
 		} catch (IOException ioException) {
 			// if the server isn't up or other errors
-			displayMessage("Error connecting to server. IP address is invalid or the server is not running");
+			displayMessage.PrintMessage("Error connecting to server. IP address is invalid or the server is not running");
 		}
 	}
 
@@ -215,7 +213,12 @@ public class Client extends JFrame implements Runnable {
 				if ((message.length() <= 1000)) {
 
 					// send the message to the server
-					output.writeUTF(userid + ": " + message);
+					ContentContainer objMessage = new ContentContainer(rndid);
+					
+					objMessage.setUsername(username);
+					objMessage.setMessage(message);
+					
+					output.writeObject(objMessage);
 
 					// set the username if it starts with /username
 					if (message.startsWith("/username")) {
@@ -225,134 +228,57 @@ public class Client extends JFrame implements Runnable {
 						if (message.substring(10).length() < 15) {
 
 							// set the username and remove colons
-							userid = message.substring(10).replaceAll(":", " ");
+							username = message.substring(10).replaceAll(":", " ");
 						} else {
-							displayMessage("That username is too long!");
-						} // end else
-					} // end if
-				} // end if
-			} // end if
+							displayMessage.PrintMessage("That username is too long!");
+						} 
+					} 
+				} 
+			} 
 
 			// Clear out text input field
 			textfield.setText("");
 
 		} catch (IOException ioException) {
-			displayMessage("Error:\n" + ioException);
+			displayMessage.PrintMessage("Error: " + ioException);
 		}
 	}
 
-	// background thread to recieve and print messages
+	// background thread to receive and print messages
 	public void run() {
 		try {
-			// recieve messages until program closed
+			// Receive messages until program closed
 			while (true) {
-				// get the message from the server
-				String message = input.readUTF();
+				
+				ContentContainer objMessage;
+				
+				try {
+					objMessage = (ContentContainer) input.readObject();
 
-				// pass the message to displayMessage
-				displayMessage(message);
+
+					if (objMessage.getContentType() == 0) {
+						System.out.println("Recieved empty ContentContainer from ObjectInputStream");
+						
+					} else if (objMessage.getContentType() == 1) {
+						displayMessage.PrintMessage(objMessage);
+						
+					} else if (objMessage.getContentType() == 2) {
+						// TODO: deal with receiving usernames
+						
+					} else {
+						displayMessage.PrintMessage("Please get the newest version of JChatClient at bit.ly/jchatserver");
+						System.out.println("Unhandled ContentContainer content type");
+					}
+
+				} catch (ClassNotFoundException e) {
+					System.out.println("Class not found error reading ContentContainer from ObjectInputStream");
+				}
+
 
 			}
 		} catch (IOException ioexception) {
-			displayMessage("Error:\n" + ioexception);
+			displayMessage.PrintMessage("Error: " + ioexception);
 		}
-	}
-
-	private void displayMessage(String message) {
-
-		// remove accidental spaces before and after message
-		message.trim();
-
-		// add a line break
-		message = message + "\n";
-
-		// create an attribute set for the text style
-		SimpleAttributeSet stlye = new SimpleAttributeSet();
-
-		// if the message contains a recognized string, apply the requested
-		// style and remove the command
-		if (message.contains("/red")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.RED);
-			message = message.replaceAll("/red", "");
-
-		} // end if
-
-		if (message.contains("/green")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.GREEN);
-			message = message.replaceAll("/green", "");
-		} // end if
-
-		if (message.contains("/yellow")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.YELLOW);
-			message = message.replaceAll("/yellow", "");
-		} // end if
-
-		if (message.contains("/blue")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.BLUE);
-			message = message.replaceAll("/blue", "");
-		} // end if
-
-		if (message.contains("/magenta")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.MAGENTA);
-			message = message.replaceAll("/magenta", "");
-		} // end if
-
-		if (message.contains("/cyan")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.CYAN);
-			message = message.replaceAll("/cyan", "");
-		} // end if
-
-		if (message.contains("/orange")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.ORANGE);
-			message = message.replaceAll("/orange", "");
-		} // end if
-
-		if (message.contains("/pink")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.PINK);
-			message = message.replaceAll("/pink", "");
-		} // end if
-
-		if (message.contains("/black")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.BLACK);
-			message = message.replaceAll("/black", "");
-		} // end if
-
-		if (message.contains("/white")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Foreground,
-					Color.WHITE);
-			message = message.replaceAll("/white", "");
-		} // end if
-
-		if (message.contains("/bold")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Bold,
-					Boolean.TRUE);
-			message = message.replaceAll("/bold", "");
-		} // end if
-
-		if (message.contains("/italic")) {
-			stlye.addAttribute(StyleConstants.CharacterConstants.Italic,
-					Boolean.TRUE);
-			message = message.replaceAll("/italic", "");
-		} // end if
-
-		try {
-			// print the message to the document which then goes to the textpane
-			// and apply the custom style
-			document.insertString(document.getLength(), message, stlye);
-		} catch (BadLocationException e) {
-			e.printStackTrace();
-		}
-		// autoscroll the text
-		textpane.setCaretPosition(textpane.getDocument().getLength());
 	}
 
 	// main method for testing purposes - normally never called

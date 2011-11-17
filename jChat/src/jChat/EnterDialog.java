@@ -100,6 +100,7 @@ public class EnterDialog extends JDialog {
 		
 		//set up the ipAddressField
 		ipAddressField = new JTextField();
+		ipAddressField.setText("10.31.143.172");
 		ipAddressField.addActionListener(actionSubmit);
 		ipAddressField.setForeground(new Color(180, 180, 180));
 		ipAddressField.setBackground(new Color(65, 65, 65));

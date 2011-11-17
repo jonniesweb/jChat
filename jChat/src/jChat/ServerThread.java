@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 
+
 // extend thread so that this class can be threaded
 public class ServerThread extends Thread {
 	// define server from Server.java
@@ -49,19 +50,34 @@ public class ServerThread extends Thread {
 			// loop forever, until the client disconnects
 			while (true) {
 
-				// get the message from the client
-				String message = input.readUTF();
+				// TODO: comment this
 
-				// pass the message to server.sendToAll
-				server.sendToAll( message );
-			}
+				ContentContainer objMessage;
+
+				objMessage = (ContentContainer) input.readObject();
+
+
+				if (objMessage.getContentType() == 0) {
+					System.out.println("Recieved empty ContentContainer from ObjectInputStream");
+				} else if (objMessage.getContentType() == 1) {
+					server.sendToAll(objMessage);
+				} else if (objMessage.getContentType() == 2) {
+					// TODO: deal with receiving usernames
+				} else {
+					System.out.println("Unhandled ContentContainer content type");
+				}
+
+			} 
+
 			// handle exceptions
 		} catch( EOFException ie ) {
-			// There wont be any end of file markers
+			System.out.println("Client " + socket.getInetAddress().getHostName() + " disconnected");
 		} catch( IOException ie ) {
 			ie.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			System.out.println("Class not found error reading ContentContainer from ObjectInputStream");
 		} finally {
-			
+
 			// once the client closes the connection pass the socket to server.removeConnection
 			server.removeConnection( socket );
 		}

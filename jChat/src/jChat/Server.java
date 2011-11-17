@@ -45,9 +45,9 @@ public class Server extends JFrame
 
 	// create a JTextArea for the programs console
 	private JTextArea textarea = new JTextArea();
-	
+
 	private DisplayMessage DisplayMessage = new DisplayMessage(textarea);
-	
+
 	private Socket socket;
 
 	// pass the port to the private method listen
@@ -63,20 +63,22 @@ public class Server extends JFrame
 		listen( port );
 	}
 	private void listen( int port ) throws IOException {
-		
-		
+
+
 		addWindowListener(new java.awt.event.WindowAdapter(){
 
 			public void windowClosing(WindowEvent winEvt) {
-				
-				sendToAll("The chat server has shut down");
-				
+
+				ContentContainer objMessage = new ContentContainer(0);
+				objMessage.setMessage("The chat server has shut down");
+				sendToAll(objMessage);
+
 				try {
 					serversocket.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-					System.exit(0);
+				System.exit(0);
 			}
 		});
 
@@ -142,7 +144,9 @@ public class Server extends JFrame
 			output.flush();
 
 			// test welcome message
-			output.writeUTF("Welcome to the Server!");
+			ContentContainer objMessage = new ContentContainer(0);
+			objMessage.setMessage("Welcome to the Server!");
+			output.writeObject(objMessage);
 
 			// put this stream in a hashtable so that it can be referenced quickly
 			hashtable.put( socket, output );
@@ -158,29 +162,29 @@ public class Server extends JFrame
 		return hashtable.elements();
 	}
 	// take the passed message and send it to all clients
-	void sendToAll( String message ) {
+	void sendToAll( ContentContainer objMessage ) {
+
+		String username = objMessage.getUsername();
+		String message = objMessage.getMessageText();
 
 		// piggyback off this method to display it to the console
-		DisplayMessage.PrintMessage(message);
+		DisplayMessage.PrintMessage(objMessage);
+		
+		
+		// only allow one method at a time to access this so that data doesn't get corrupt
+		synchronized( hashtable ) {
+			
+			// do the following for each entry in the hashtable
+			for (Enumeration<ObjectOutputStream> enumeration = getOutputStreams(); enumeration.hasMoreElements(); )
+			{
+				// get the output stream for the socket in the hashtable
+				ObjectOutputStream output = (ObjectOutputStream)enumeration.nextElement();
 
-
-		// don't send any messages that start with a /
-		if (!message.startsWith("/")) {
-
-			// only allow one method at a time to access this so that data doesn't get corrupt
-			synchronized( hashtable ) {
-				// do the following for each entry in the hashtable
-				for (Enumeration enumeration = getOutputStreams(); enumeration.hasMoreElements(); )
-				{
-					// get the output stream for the socket in the hashtable
-					ObjectOutputStream output = (ObjectOutputStream)enumeration.nextElement();
-
-					try {
-						// send the message to the client
-						output.writeUTF( message );
-					} catch( IOException ie ) {
-						DisplayMessage.PrintMessage("Error sending message" + ie); 
-					}
+				try {
+					// send the message to the client
+					output.writeObject(objMessage);
+				} catch( IOException ie ) {
+					DisplayMessage.PrintMessage("Error sending message" + ie); 
 				}
 			}
 		} // end if
@@ -228,38 +232,6 @@ public class Server extends JFrame
 		//		application.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
 	}
-	
-	public class ContentContainer implements Serializable {
-		
-		private int contentType = 0;
-		private int senderID = 0;
-		private String messageText = null;
-		private static final String programVer = "1.0";
-		private String username = null;
 
-		public void setMessage(int senderID, String messageText) {
-			contentType = 1;
-			this.senderID = senderID;
-			this.messageText = messageText;
-			
-		}
-		
-		public void setUsername(int senderID, String username) {
-			contentType = 2;
-			this.senderID = senderID;
-			this.username = username;
-		}
-		
-		public String getText() {
-			return messageText;
-		}
-		
-		public int getContentType() {
-			return contentType;
-		}
-		
-		
-	}
-	
-	
+
 }
