@@ -4,21 +4,23 @@
 	<!--ANT 1.7 is required                                        -->
 
 	<target name="create_run_jar">
-		
-		
+
+
 		<propertyfile file="build.properties">
 			<entry key="build.number" type="int" operation="+" default="0" />
 		</propertyfile>
 		<property file="build.properties" />
-		<echo>Build number is ${major}.${minor}.${build.number}</echo>
-		
-		
-		<jar destfile="/home/jonnie/git/jChat/jChat/jChatClient-${type}-${major}.${minor}.${build.number}.jar" filesetmanifest="mergewithoutmain">
+		<echo>Build number is ${type}-${major}.${minor}.${build.number}</echo>
+
+		<jar destfile="${destination}/jChatClient-${type}-${major}.${minor}.${build.number}.jar" filesetmanifest="mergewithoutmain">
 			<manifest>
 				<attribute name="Main-Class" value="jChat.EnterDialog" />
 				<attribute name="Class-Path" value="." />
+				
 			</manifest>
 			<fileset dir="/home/jonnie/git/jChat/jChat/bin" />
+			
 		</jar>
+
 	</target>
 </project>
