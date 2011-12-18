@@ -14,7 +14,7 @@
 
 		<jar destfile="${destination}/jChatClient-${type}-${major}.${minor}.${build.number}.jar" filesetmanifest="mergewithoutmain">
 			<manifest>
-				<attribute name="Main-Class" value="jChat.EnterDialog" />
+				<attribute name="Main-Class" value="client.EnterDialog" />
 				<attribute name="Class-Path" value="." />
 				
 			</manifest>
