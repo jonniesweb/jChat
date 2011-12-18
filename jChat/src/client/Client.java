@@ -11,7 +11,7 @@
  */
 
 //package to segment the client and server portions
-package jChat;
+package client;
 
 // Various imports
 import java.awt.BorderLayout;
@@ -36,6 +36,9 @@ import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
+
+import common.ContentContainer;
+import common.DisplayMessage;
 
 // extend JFrame so that we can access its methods
 // implement Runnable so that we can have threaded methods

@@ -11,10 +11,9 @@
  */
 
 // package to segment the client and server portions
-package jChat;
+package server;
 
 // various imports
-import jChat.DisplayMessage;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.io.ObjectOutputStream;
@@ -29,6 +28,10 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
+
+import common.ContentContainer;
+import common.DisplayMessage;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.WindowEvent;

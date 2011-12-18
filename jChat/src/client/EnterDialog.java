@@ -10,7 +10,7 @@
  */
 
 // package to segment the client and server portions
-package jChat;
+package client;
 
 // various imports
 import java.awt.Color;

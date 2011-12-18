@@ -12,13 +12,15 @@
  */
 
 // package to segment the client and server portions
-package jChat;
+package server;
 
 // various imports
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
+
+import common.ContentContainer;
 
 
 // extend thread so that this class can be threaded

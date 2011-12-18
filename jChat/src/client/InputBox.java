@@ -1,4 +1,4 @@
-package jChat;
+package client;
 
 import javax.swing.JDialog;
 import javax.swing.JLabel;
