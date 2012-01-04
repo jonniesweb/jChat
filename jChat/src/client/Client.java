@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.Random;
+import java.util.logging.Logger;
 
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -76,10 +77,13 @@ public class Client extends JFrame implements Runnable {
 	// define DisplayMessage to handle object messages
 	private DisplayMessage displayMessage = new DisplayMessage(textPane, document);
 	
+	// define the logger
+	private final static Logger log = Logger.getLogger(Client.class.getName());
+	
 	
 	public Client(String host) {
 		// call the superclass constructor and pass it the window title we want
-		// to give
+		// to give, setTitle() could have easily been used
 		super("jChatClient - Created by Jonnie Simpson");
 
 		// when the user enters information in the text box and presses enter
@@ -130,6 +134,7 @@ public class Client extends JFrame implements Runnable {
 		mntmExit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				log.info("Exiting Program via menu");
 				System.exit(0);
 			}
 		});
@@ -137,9 +142,9 @@ public class Client extends JFrame implements Runnable {
 		final ActionListener actionUsernameSubmit = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				 username = inputBox.getTextField();
+				username = inputBox.getTextField();
 				inputBox.dispose();
-				
+				log.info("Set username to: " + username);
 			}
 		};
 
@@ -170,12 +175,15 @@ public class Client extends JFrame implements Runnable {
 				Runtime run = Runtime.getRuntime();
 				try {
 					run.exec(cmd);
+					log.info("Started UT2004");
 					
 					// If the computer isn't able to locate/start the program, 
 					// print an error to the screen
 				} catch (IOException e1) {
 					displayMessage.PrintMessage("Unable to start UT2004");
+					log.warning("Unable to start UT2004");
 				}
+				
 			}
 		});
 		
@@ -197,12 +205,15 @@ public class Client extends JFrame implements Runnable {
 			// server
 			input = new ObjectInputStream(socket.getInputStream());
 			output = new ObjectOutputStream(socket.getOutputStream());
-
+			
+			log.info("Connected to: " + socket.getInetAddress().getHostName());
+			
 			// start this thread in the background
 			new Thread(this).start();
 		} catch (IOException ioException) {
 			// if the server isn't up or other errors
 			displayMessage.PrintMessage("Error connecting to server. IP address is invalid or the server is not running");
+			log.severe("Unable to connect to Server. Host or network not up");
 		}
 	}
 
@@ -220,6 +231,8 @@ public class Client extends JFrame implements Runnable {
 					objMessage.setMessage(message);
 					
 					output.writeObject(objMessage);
+					
+					log.info("Sent message: " + objMessage.getMessageText());
 
 					// set the username if it starts with /username
 					if (message.startsWith("/username")) {
@@ -234,14 +247,19 @@ public class Client extends JFrame implements Runnable {
 							displayMessage.PrintMessage("That username is too long!");
 						} 
 					} 
-				} 
-			} 
+				} else {
+					log.finer("Message is longer than 1000 characters");
+				}
+			} else {
+				log.finer("Message is blank");
+			}
 
 			// Clear out text input field
 			textfield.setText("");
 
 		} catch (IOException ioException) {
 			displayMessage.PrintMessage("Error: " + ioException);
+			log.warning("Error sending message to Server: " + ioException);
 		}
 	}
 
@@ -262,6 +280,7 @@ public class Client extends JFrame implements Runnable {
 						
 					} else if (objMessage.getContentType() == 1) {
 						displayMessage.PrintMessage(objMessage);
+						log.info("Recieved message: " + objMessage.getMessageText());
 						
 					} else if (objMessage.getContentType() == 2) {
 						// TODO: deal with receiving usernames
@@ -273,12 +292,14 @@ public class Client extends JFrame implements Runnable {
 
 				} catch (ClassNotFoundException e) {
 					System.out.println("Class not found error reading ContentContainer from ObjectInputStream");
+					log.warning("Unable to read message sent from server");
 				}
 
 
 			}
 		} catch (IOException ioexception) {
 			displayMessage.PrintMessage("Error: " + ioexception);
+			log.warning("IOExecption: " + ioexception);
 		}
 	}
 
@@ -286,6 +307,7 @@ public class Client extends JFrame implements Runnable {
 	public static void main(String[] args) {
 
 		new Client("localhost");
+		log.info("Attempting to connect to localhost");
 
 	}
 }
