@@ -31,20 +31,22 @@ import javax.swing.JLabel;
 
 import common.ContentContainer;
 import common.DisplayMessage;
+import database.DatabaseConnection;
 
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.WindowEvent;
 
 // extend JFrame so that we can use JFrame methods easily
-public class Server extends JFrame
+public final class Server extends JFrame
 {
 	// define the serversocket
 	private ServerSocket serversocket;
 
 	// define a new hashtable
 	// if it messes up, remove arguments
-	private Hashtable<Socket, ObjectOutputStream> hashtable = new Hashtable<Socket, ObjectOutputStream>();
+//	private Hashtable<Socket, ObjectOutputStream> hashtable = new Hashtable<Socket, ObjectOutputStream>();
+	private Hashtable<Socket, UserAccount> hashtable = new Hashtable<Socket, UserAccount>();
 
 	// create a JTextArea for the programs console
 	private JTextArea textarea = new JTextArea();
@@ -52,6 +54,8 @@ public class Server extends JFrame
 	private DisplayMessage DisplayMessage = new DisplayMessage(textarea);
 
 	private Socket socket;
+	
+	protected static DatabaseConnection databaseConnection = new DatabaseConnection("jdbc:hsqldb:hsql://localhost/jchat");
 
 	// pass the port to the private method listen
 	public Server( int port ) throws IOException {
@@ -129,7 +133,7 @@ public class Server extends JFrame
 		}
 
 		// display to the console  what port its listening on
-		DisplayMessage.PrintMessage("Listening on "+serversocket);
+		DisplayMessage.PrintMessage("Listening on "+ serversocket.getInetAddress() + ":" + serversocket.getLocalPort());
 
 		// accept connections forever
 		while (true) {
@@ -152,16 +156,16 @@ public class Server extends JFrame
 			output.writeObject(objMessage);
 
 			// put this stream in a hashtable so that it can be referenced quickly
-			hashtable.put( socket, output );
-
+			UserAccount userAccount = new UserAccount("uuid", "username", "real name", "statusmessage", (byte) 1, "male", "here", "password", output);
+			hashtable.put( socket, userAccount );
 
 			// pass the method and serversocket to the ServerThread class
-			new ServerThread( this, socket );
+			new ServerThread( this, socket, userAccount);
 		}
 	}
 
 	// return everything in the hashtable
-	private Enumeration getOutputStreams() {
+	private Enumeration getHashtable() {
 		return hashtable.elements();
 	}
 	// take the passed message and send it to all clients
@@ -178,10 +182,10 @@ public class Server extends JFrame
 		synchronized( hashtable ) {
 			
 			// do the following for each entry in the hashtable
-			for (Enumeration<ObjectOutputStream> enumeration = getOutputStreams(); enumeration.hasMoreElements(); )
+			for (Enumeration<UserAccount> enumeration = getHashtable(); enumeration.hasMoreElements(); )
 			{
 				// get the output stream for the socket in the hashtable
-				ObjectOutputStream output = (ObjectOutputStream)enumeration.nextElement();
+				ObjectOutputStream output = (ObjectOutputStream)enumeration.nextElement().getOutputstream();
 
 				try {
 					// send the message to the client
@@ -216,7 +220,7 @@ public class Server extends JFrame
 	}
 
 	// main method thats run first
-	static public void main( String args[] ) {
+	public static void main( String args[] ) {
 
 		// use port #1337
 		int port = 1337;

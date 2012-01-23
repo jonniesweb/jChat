@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -81,7 +82,8 @@ public class Client extends JFrame implements Runnable {
 	private final static Logger log = Logger.getLogger(Client.class.getName());
 	
 	
-	public Client(String host) {
+	
+	public Client(Socket socket) {
 		// call the superclass constructor and pass it the window title we want
 		// to give, setTitle() could have easily been used
 		super("jChatClient - Created by Jonnie Simpson");
@@ -195,7 +197,7 @@ public class Client extends JFrame implements Runnable {
 		// Connect to the server
 		try {
 			// Initiate the connection
-			socket = new Socket(host, 1337);
+			this.socket = socket;
 			// If connected tell the user it was successful
 			displayMessage.PrintMessage("Connected to: "
 					+ socket.getInetAddress().getHostName() + " on port: "
@@ -306,7 +308,15 @@ public class Client extends JFrame implements Runnable {
 	// main method for testing purposes - normally never called
 	public static void main(String[] args) {
 
-		new Client("localhost");
+		try {
+			new Client(new Socket("localhost", 1337));
+		} catch (UnknownHostException e) {
+			log.severe("Failed to connect to server");
+			e.printStackTrace();
+		} catch (IOException e) {
+			log.severe("Failed to connect to server");
+			e.printStackTrace();
+		}
 		log.info("Attempting to connect to localhost");
 
 	}
