@@ -20,6 +20,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 
+import client.NetworkConnection;
+
+import message.Disconnect;
 import message.LoginUser;
 import message.Message;
 import message.RegisterUser;
@@ -32,13 +35,14 @@ import database.DatabaseConnection;
 
 // extend thread so that this class can be threaded
 public class ServerThread extends Thread {
-	// define server from Server.java
+	// define server from Server class
 	private Server server;
 
 	// define a socket
 	private Socket socket;
 	private UserAccount userAccount;
 	private DatabaseConnection databaseConnection = Server.databaseConnection;
+	private NetworkConnection networkConnection;
 			
 	
 	// Set up this class' constructor and then start the threaded portion
@@ -48,6 +52,7 @@ public class ServerThread extends Thread {
 		this.server = server;
 		this.socket = socket;
 		this.userAccount = userAccount;
+		
 
 		//Start the thread
 		start();
@@ -65,22 +70,28 @@ public class ServerThread extends Thread {
 
 				// TODO: comment this
 
-				ContentContainer objMessage;
+//				ContentContainer objMessage;
 
 //				objMessage = (ContentContainer) input.readObject();
 				
 				Object obj = input.readObject();
 				
-				if (obj.getClass() == Message.class.getClass()) {
+				System.out.println(obj.getClass().getCanonicalName());
+				System.out.println(LoginUser.class.getCanonicalName());
+				
+				if (obj.getClass().getCanonicalName() == Message.class.getCanonicalName()) {
 					handleMessage((Message) obj);
-				} else if (obj.getClass() == LoginUser.class.getClass()) {
+				} else if (obj.getClass().getCanonicalName() == Disconnect.class.getCanonicalName()) {
+					handleDisconnect((Disconnect) obj);
+				} else if (obj.getClass().getCanonicalName() == LoginUser.class.getCanonicalName()) {
 					handleLogin((LoginUser) obj);
-				} else if (obj.getClass() == User.class.getClass()) {
+				} else if (obj.getClass().getCanonicalName() == User.class.getCanonicalName()) {
 					handleUser((User) obj);
-				} else if (obj.getClass() == RegisterUser.class.getClass()) {
+				} else if (obj.getClass().getCanonicalName() == RegisterUser.class.getCanonicalName()) {
 					
 				} else {
 					System.out.println("Unknown message type recieved, dropped message");
+					obj = null;
 				}
 
 
@@ -110,6 +121,11 @@ public class ServerThread extends Thread {
 		}
 	}
 
+	private void handleDisconnect(Disconnect disconnect) {
+		server.sendToAll(disconnect);
+		
+	}
+
 	private void handleUser(User user) {
 		UserAccount userAccount = (UserAccount) user;
 		
@@ -118,6 +134,7 @@ public class ServerThread extends Thread {
 	private void handleLogin(LoginUser login) {
 		
 		if(databaseConnection.isUserInDatabase(login)) {
+			// temporary
 			userAccount.sendObject(true);
 		}
 		
@@ -125,7 +142,7 @@ public class ServerThread extends Thread {
 	}
 
 	private void handleMessage(Message message) {
-		
+		server.sendMessageToAll(message);
 		
 	}
 }

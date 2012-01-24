@@ -10,6 +10,8 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+import message.Message;
+
 
 public class DisplayMessage {
 
@@ -34,13 +36,21 @@ public class DisplayMessage {
 		textType = false;
 	}
 
-	public void PrintMessage(String message) {
+	public void PrintMessage(Message message) {
+		String txtmessage = message.getMessage();
+		txtmessage.trim();
+		txtmessage += "\n";
 
+		aPrintingMethod(txtmessage);
+
+	}
+	
+	public void PrintMessage(String message) {
 		message.trim();
 		message += "\n";
-
+		
 		aPrintingMethod(message);
-
+		
 	}
 
 	public void PrintMessage(ContentContainer contentContainer) {

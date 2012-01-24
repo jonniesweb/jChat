@@ -7,6 +7,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
+import message.ID;
 import message.LoginUser;
 import message.RegisterUser;
 import net.miginfocom.swing.MigLayout;
@@ -34,6 +35,9 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.awt.event.InputMethodListener;
 import java.awt.event.InputMethodEvent;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextPane;
 
 /**
  * Creates the Login Window so that the user can establish a connection,
@@ -83,7 +87,7 @@ public class LoginWindow extends JFrame {
 		setTitle("jChat - Login");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 368, 290);
+		setBounds(100, 100, 352, 348);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		setContentPane(contentPane);
@@ -101,7 +105,7 @@ public class LoginWindow extends JFrame {
 			public void actionPerformed(ActionEvent e) {
 				try {
 					socket = new Socket(txtIPAddress.getText(), 1337);
-					networkConnection = new NetworkConnection(socket);
+					networkConnection = new NetworkConnection(null, socket);
 					setLoginEnabled(true);
 					setRegisterEnabled(true);
 					setConnectEnabled(false);
@@ -133,8 +137,12 @@ public class LoginWindow extends JFrame {
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 
-				login(txtLoginEmail.getText(), txtLoginPassword.getPassword());
-
+				boolean result = login(txtLoginEmail.getText(), txtLoginPassword.getPassword());
+				
+				if (result) {
+					dispose();
+				}
+				
 			}
 		});
 		panelLogin.add(btnLogin, "cell 0 5,growx");
@@ -258,20 +266,25 @@ public class LoginWindow extends JFrame {
 			emailAddress = email;
 
 		} else {
+			lblStatus.setText("Email address must be valid");
 			return false;
 		}
 
-		// check the password
-		try {
-			passwordHash = MD5.generateMD5(Hex.decodeHex(password));
-		} catch (DecoderException e) {
-			return false;
-		}
+		passwordHash = MD5.generateMD5(String.valueOf(password));
 		
 		// create a Login message to send to the server
 		LoginUser loginUser = new LoginUser(emailAddress, passwordHash);
 		networkConnection.sendMessage(loginUser);
 		boolean result = getLoginResponse();
+		
+		/*
+		 * refactor this into constructor
+		 */
+		if (result) {
+			ID id = new ID(MD5.generateMD5(emailAddress));
+			networkConnection.setID(id.getStringID());
+			new Client(id, networkConnection);
+		}
 		
 		return true;
 	}

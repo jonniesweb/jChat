@@ -1,6 +1,8 @@
 package message;
 
-public class LoginUser {
+import java.io.Serializable;
+
+public class LoginUser implements Serializable {
 	
 	private String email;
 	private String hashPassword;

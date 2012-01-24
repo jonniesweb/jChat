@@ -25,6 +25,9 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
@@ -39,6 +42,10 @@ import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 
+import message.ID;
+import message.Message;
+import message.User;
+
 import common.ContentContainer;
 import common.DisplayMessage;
 
@@ -50,8 +57,8 @@ public class Client extends JFrame implements Runnable {
 	private JScrollPane scrollPane = new JScrollPane();
 	private JTextField textfield = new JTextField();
 	private InputBox inputBox;
-	
 
+	private Map<ID, User> map = Collections.synchronizedMap(new HashMap<ID, User>());
 
 	// define socket connecting to the server
 	private Socket socket;
@@ -74,19 +81,24 @@ public class Client extends JFrame implements Runnable {
 	private final JMenuItem mntmChangeUsername = new JMenuItem("Change Username...");
 	private final JMenu mnMiscellaneous = new JMenu("Miscellaneous");
 	private final JMenuItem mntmPlayUt = new JMenuItem("Play UT2004");
-	
+
 	// define DisplayMessage to handle object messages
 	private DisplayMessage displayMessage = new DisplayMessage(textPane, document);
-	
+	private ID id;
+
 	// define the logger
 	private final static Logger log = Logger.getLogger(Client.class.getName());
-	
-	
-	
-	public Client(Socket socket) {
+
+
+
+
+
+	public Client(ID id, NetworkConnection networkConnection) {
 		// call the superclass constructor and pass it the window title we want
 		// to give, setTitle() could have easily been used
-		super("jChatClient - Created by Jonnie Simpson");
+		super("jChat Client - Created by Jonnie Simpson");
+
+		this.id = id;
 
 		// when the user enters information in the text box and presses enter
 		// the message is passed to processMessage
@@ -129,6 +141,10 @@ public class Client extends JFrame implements Runnable {
 		// set the window size
 		setSize(300, 500);
 
+		menuBar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+		menuBar.setForeground(new Color(180, 180, 180));
+		menuBar.setBackground(new Color(65, 65, 65));
+		
 		setJMenuBar(menuBar);
 
 		// menu option "exit" action listener
@@ -157,98 +173,55 @@ public class Client extends JFrame implements Runnable {
 				inputBox = new InputBox();
 				inputBox.setBodyText("Please enter your new username");
 				inputBox.createDialog(actionUsernameSubmit, null);
-				
+
 			}
 		});
 
 		mnFile.add(mntmChangeUsername);
 
 		mnFile.add(mntmExit);
-		
+
 		menuBar.add(mnMiscellaneous);
-		
+
 		// If the client machine is one belonging to Humberview they
 		// have the ability to play UT2004
 		mntmPlayUt.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				// start in windowed because I'm fly like that
-				String cmd = "M:\\circus_4\\byp\\System\\UT2004.exe -windowed";
-				Runtime run = Runtime.getRuntime();
-				try {
-					run.exec(cmd);
-					log.info("Started UT2004");
-					
-					// If the computer isn't able to locate/start the program, 
-					// print an error to the screen
-				} catch (IOException e1) {
-					displayMessage.PrintMessage("Unable to start UT2004");
-					log.warning("Unable to start UT2004");
-				}
-				
+				startUT2004();
 			}
 		});
-		
+
 		mnMiscellaneous.add(mntmPlayUt);
 
 		// show the window
 		setVisible(true);
 
-		// Connect to the server
-		try {
-			// Initiate the connection
-			this.socket = socket;
-			// If connected tell the user it was successful
-			displayMessage.PrintMessage("Connected to: "
-					+ socket.getInetAddress().getHostName() + " on port: "
-					+ socket.getPort());
+		// Initiate the connection
+		this.socket = networkConnection.getSocket();
+		// If connected tell the user it was successful
+		displayMessage.PrintMessage("Connected to: "
+				+ networkConnection.getSocket().getInetAddress().getHostName() + " on port: "
+				+ networkConnection.getSocket().getPort());
 
-			// create the input and output streams to communicate with the
-			// server
-			input = new ObjectInputStream(socket.getInputStream());
-			output = new ObjectOutputStream(socket.getOutputStream());
-			
-			log.info("Connected to: " + socket.getInetAddress().getHostName());
-			
-			// start this thread in the background
-			new Thread(this).start();
-		} catch (IOException ioException) {
-			// if the server isn't up or other errors
-			displayMessage.PrintMessage("Error connecting to server. IP address is invalid or the server is not running");
-			log.severe("Unable to connect to Server. Host or network not up");
-		}
+		// get the input and output object streams from networkConnection
+		input = networkConnection.getInputStream();
+		output = networkConnection.getOutputStream();
+
+		log.info("Connected to: " + networkConnection.getSocket().getInetAddress().getHostName());
+
+		// start this thread in the background
+		new Thread(this).start();
 	}
 
 	// Gets called when the user types something
-	private void processMessage(String message) {
+	private void processMessage(String txtmessage) {
 		try {
 			// Make sure the message isn't blank or more than 1000 characters
-			if (!message.equals("")) {
-				if ((message.length() <= 1000)) {
-
+			if (!txtmessage.equals("")) {
+				if ((txtmessage.length() <= 1000)) {
 					// send the message to the server
-					ContentContainer objMessage = new ContentContainer(rndid);
+					output.writeObject(new Message(id.getStringID(), txtmessage, 0));
 					
-					objMessage.setUsername(username);
-					objMessage.setMessage(message);
-					
-					output.writeObject(objMessage);
-					
-					log.info("Sent message: " + objMessage.getMessageText());
-
-					// set the username if it starts with /username
-					if (message.startsWith("/username")) {
-
-						// make sure the username isn't longer than 15
-						// characters
-						if (message.substring(10).length() < 15) {
-
-							// set the username and remove colons
-							username = message.substring(10).replaceAll(":", " ");
-						} else {
-							displayMessage.PrintMessage("That username is too long!");
-						} 
-					} 
 				} else {
 					log.finer("Message is longer than 1000 characters");
 				}
@@ -270,33 +243,28 @@ public class Client extends JFrame implements Runnable {
 		try {
 			// Receive messages until program closed
 			while (true) {
-				
-				ContentContainer objMessage;
-				
+
 				try {
-					objMessage = (ContentContainer) input.readObject();
-
-
-					if (objMessage.getContentType() == 0) {
-						System.out.println("Recieved empty ContentContainer from ObjectInputStream");
+					Object obj = input.readObject();
+					
+					if (obj.getClass().getCanonicalName() == Message.class.getCanonicalName()) {
+						Message message = (Message) obj;
+						displayMessage.PrintMessage(message.getMessage());
 						
-					} else if (objMessage.getContentType() == 1) {
-						displayMessage.PrintMessage(objMessage);
-						log.info("Recieved message: " + objMessage.getMessageText());
-						
-					} else if (objMessage.getContentType() == 2) {
-						// TODO: deal with receiving usernames
+					} else if (obj.getClass().getCanonicalName() == User.class.getCanonicalName()) {
+						User user = (User) obj;
+						UserMap.addUser(user);
 						
 					} else {
-						displayMessage.PrintMessage("Please get the newest version of JChatClient at bit.ly/jchatserver");
-						System.out.println("Unhandled ContentContainer content type");
+						System.out.println("Unhandled object recieved, dropping object");
 					}
-
+					
+					
 				} catch (ClassNotFoundException e) {
-					System.out.println("Class not found error reading ContentContainer from ObjectInputStream");
-					log.warning("Unable to read message sent from server");
+					e.printStackTrace();
 				}
-
+				
+				
 
 			}
 		} catch (IOException ioexception) {
@@ -305,11 +273,27 @@ public class Client extends JFrame implements Runnable {
 		}
 	}
 
+	private void startUT2004() {
+		// start in windowed because I'm fly like that
+		String cmd = "M:\\circus_4\\byp\\System\\UT2004.exe -windowed";
+		Runtime run = Runtime.getRuntime();
+		try {
+			run.exec(cmd);
+			log.info("Started UT2004");
+
+			// If the computer isn't able to locate/start the program, 
+			// print an error to the screen
+		} catch (IOException e1) {
+			displayMessage.PrintMessage("Unable to start UT2004");
+			log.warning("Unable to start UT2004");
+		}
+	}
+
 	// main method for testing purposes - normally never called
 	public static void main(String[] args) {
 
 		try {
-			new Client(new Socket("localhost", 1337));
+			new Client(new ID("testuuid"), new NetworkConnection("testuuid", new Socket("localhost", 1337)));
 		} catch (UnknownHostException e) {
 			log.severe("Failed to connect to server");
 			e.printStackTrace();

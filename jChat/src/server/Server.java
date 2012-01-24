@@ -29,6 +29,10 @@ import javax.swing.JTextArea;
 import javax.swing.JPanel;
 import javax.swing.JLabel;
 
+import message.Disconnect;
+import message.ID;
+import message.Message;
+
 import common.ContentContainer;
 import common.DisplayMessage;
 import database.DatabaseConnection;
@@ -50,12 +54,10 @@ public final class Server extends JFrame
 
 	// create a JTextArea for the programs console
 	private JTextArea textarea = new JTextArea();
-
 	private DisplayMessage DisplayMessage = new DisplayMessage(textarea);
-
 	private Socket socket;
-	
 	protected static DatabaseConnection databaseConnection = new DatabaseConnection("jdbc:hsqldb:hsql://localhost/jchat");
+	private ID id = new ID("server");
 
 	// pass the port to the private method listen
 	public Server( int port ) throws IOException {
@@ -76,14 +78,15 @@ public final class Server extends JFrame
 
 			public void windowClosing(WindowEvent winEvt) {
 
-				ContentContainer objMessage = new ContentContainer(0);
-				objMessage.setMessage("The chat server has shut down");
-				sendToAll(objMessage);
+
+				sendMessageToAll(new Message(id.getStringID(), "The server has shut down", -1));
 
 				try {
 					serversocket.close();
 				} catch (IOException e) {
 					e.printStackTrace();
+				} finally {
+					System.exit(0);
 				}
 				System.exit(0);
 			}
@@ -147,14 +150,8 @@ public final class Server extends JFrame
 			// create a output stream to communicate with the client
 			ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 
-			// send necessary headers
-			output.flush();
-
-			// test welcome message
-			ContentContainer objMessage = new ContentContainer(0);
-			objMessage.setMessage("Welcome to the Server!");
-			output.writeObject(objMessage);
-
+//			output.flush();
+			
 			// put this stream in a hashtable so that it can be referenced quickly
 			UserAccount userAccount = new UserAccount("uuid", "username", "real name", "statusmessage", (byte) 1, "male", "here", "password", output);
 			hashtable.put( socket, userAccount );
@@ -169,15 +166,13 @@ public final class Server extends JFrame
 		return hashtable.elements();
 	}
 	// take the passed message and send it to all clients
-	void sendToAll( ContentContainer objMessage ) {
-
-		String username = objMessage.getUsername();
-		String message = objMessage.getMessageText();
-
+	void sendMessageToAll(Message message) {
 		// piggyback off this method to display it to the console
-		DisplayMessage.PrintMessage(objMessage);
+		DisplayMessage.PrintMessage(message);
 		
-		
+		sendToAll(message);
+	}
+	void sendToAll(Object object) {
 		// only allow one method at a time to access this so that data doesn't get corrupt
 		synchronized( hashtable ) {
 			
@@ -185,16 +180,22 @@ public final class Server extends JFrame
 			for (Enumeration<UserAccount> enumeration = getHashtable(); enumeration.hasMoreElements(); )
 			{
 				// get the output stream for the socket in the hashtable
-				ObjectOutputStream output = (ObjectOutputStream)enumeration.nextElement().getOutputstream();
+				ObjectOutputStream output = (ObjectOutputStream) enumeration.nextElement().getOutputstream();
 
 				try {
 					// send the message to the client
-					output.writeObject(objMessage);
+					output.writeObject(object);
 				} catch( IOException ie ) {
-					DisplayMessage.PrintMessage("Error sending message" + ie); 
+					DisplayMessage.PrintMessage("Error sending object" + ie); 
 				}
 			}
 		} // end if
+	}
+	
+	void sendDisconnectToAll(Disconnect disconnect) {
+		sendToAll(disconnect);
+		
+		
 	}
 
 	// called by the runnable in ServerThread.java

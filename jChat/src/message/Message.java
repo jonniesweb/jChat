@@ -3,9 +3,9 @@ package message;
 public class Message extends ID {
 
 	private String message;
-	private byte roomID;
+	private int roomID;
 	
-	public Message(final String uuid, final String messageText, final byte roomID) {
+	public Message(final String uuid, final String messageText, final int roomID) {
 		super(uuid);
 		
 		if (messageText.length() != 0) {
@@ -22,7 +22,7 @@ public class Message extends ID {
 		return message;
 	}
 
-	public byte getRoomID() {
+	public int getRoomID() {
 		return roomID;
 	}
 
