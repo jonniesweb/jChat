@@ -10,6 +10,7 @@ import javax.swing.border.EmptyBorder;
 import message.ID;
 import message.LoginUser;
 import message.RegisterUser;
+import message.User;
 import net.miginfocom.swing.MigLayout;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
@@ -63,6 +64,7 @@ public class LoginWindow extends JFrame {
 	private JPanel panelConnect = new JPanel();
 	private JButton btnConnect;
 	private JLabel lblStatus = new JLabel("");
+	private JTextField txtUsername;
 
 	/**
 	 * Launch the application.
@@ -94,7 +96,7 @@ public class LoginWindow extends JFrame {
 		contentPane.setLayout(new BorderLayout(0, 0));
 
 		contentPane.add(panelLogin, BorderLayout.WEST);
-		panelLogin.setLayout(new MigLayout("", "[grow]", "[][][][][][]"));
+		panelLogin.setLayout(new MigLayout("", "[grow]", "[][][][][][][][]"));
 		
 		/*
 		 * Action to attempt connecting to the server.
@@ -119,19 +121,26 @@ public class LoginWindow extends JFrame {
 
 		JLabel lblLogin = new JLabel("Login");
 		panelLogin.add(lblLogin, "cell 0 0,alignx left");
+		
+		JLabel lblUsername = new JLabel("Username");
+		panelLogin.add(lblUsername, "cell 0 1");
+		
+		txtUsername = new JTextField();
+		panelLogin.add(txtUsername, "cell 0 2,growx");
+		txtUsername.setColumns(10);
 
 		JLabel lblEmail = new JLabel("Email");
-		panelLogin.add(lblEmail, "cell 0 1,alignx left");
+		panelLogin.add(lblEmail, "cell 0 3,alignx left");
 
 		txtLoginEmail = new JTextField();
-		panelLogin.add(txtLoginEmail, "cell 0 2,growx");
+		panelLogin.add(txtLoginEmail, "cell 0 4,growx");
 		txtLoginEmail.setColumns(10);
 
 		JLabel lblPassword = new JLabel("Password");
-		panelLogin.add(lblPassword, "cell 0 3,alignx left");
+		panelLogin.add(lblPassword, "cell 0 5,alignx left");
 
 		txtLoginPassword = new JPasswordField();
-		panelLogin.add(txtLoginPassword, "cell 0 4,growx");
+		panelLogin.add(txtLoginPassword, "cell 0 6,growx");
 
 		JButton btnLogin = new JButton("Login");
 		btnLogin.addActionListener(new ActionListener() {
@@ -142,10 +151,9 @@ public class LoginWindow extends JFrame {
 				if (result) {
 					dispose();
 				}
-				
 			}
 		});
-		panelLogin.add(btnLogin, "cell 0 5,growx");
+		panelLogin.add(btnLogin, "cell 0 7,growx");
 
 		panelRegister = new JPanel();
 		contentPane.add(panelRegister, BorderLayout.EAST);
@@ -213,6 +221,11 @@ public class LoginWindow extends JFrame {
 
 	}
 	
+	private void testSendUser(String id) {
+		networkConnection.sendMessage(new User(id, "testusername" + (Math.random()*10), "bob saget", "chilling bro", 0, "horse", "the barn"));
+		
+	}
+
 	/*
 	 * Disable or enable all components in the Connection Panel.
 	 * @param b
@@ -282,8 +295,9 @@ public class LoginWindow extends JFrame {
 		 */
 		if (result) {
 			ID id = new ID(MD5.generateMD5(emailAddress));
+			User user = new User(id.getStringID(), txtUsername.getText(), null, null, 0, null, null);
 			networkConnection.setID(id.getStringID());
-			new Client(id, networkConnection);
+			new Client(user, networkConnection);
 		}
 		
 		return true;
@@ -292,7 +306,6 @@ public class LoginWindow extends JFrame {
 	
 	private boolean getLoginResponse() {
 		try {
-			// if this does not work try .readBoolean()
 			boolean result = (Boolean) networkConnection.getInputStream().readObject();
 			return result;
 		} catch (IOException e) {

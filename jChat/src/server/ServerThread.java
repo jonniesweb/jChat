@@ -68,17 +68,10 @@ public class ServerThread extends Thread {
 			// loop forever, until the client disconnects
 			while (true) {
 
-				// TODO: comment this
-
-//				ContentContainer objMessage;
-
-//				objMessage = (ContentContainer) input.readObject();
-				
+				// read the input
 				Object obj = input.readObject();
 				
-				System.out.println(obj.getClass().getCanonicalName());
-				System.out.println(LoginUser.class.getCanonicalName());
-				
+				// determine what class the object is
 				if (obj.getClass().getCanonicalName() == Message.class.getCanonicalName()) {
 					handleMessage((Message) obj);
 				} else if (obj.getClass().getCanonicalName() == Disconnect.class.getCanonicalName()) {
@@ -94,17 +87,6 @@ public class ServerThread extends Thread {
 					obj = null;
 				}
 
-
-//				if (objMessage.getContentType() == 0) {
-//					System.out.println("Recieved empty ContentContainer from ObjectInputStream");
-//				} else if (objMessage.getContentType() == 1) {
-//					server.sendToAll(objMessage);
-//				} else if (objMessage.getContentType() == 2) {
-//					// TODO: deal with receiving usernames
-//				} else {
-//					System.out.println("Unhandled ContentContainer content type");
-//				}
-
 			} 
 
 			// handle exceptions
@@ -118,19 +100,35 @@ public class ServerThread extends Thread {
 
 			// once the client closes the connection pass the socket to server.removeConnection
 			server.removeConnection( socket );
+			server.sendDisconnectToAll(new Disconnect(userAccount.getID()));
 		}
 	}
 
+	/**
+	 * Sends this Disconnect class to all connected clients to tell them that
+	 * the ID of the sender is disconnecting
+	 * @param disconnect The Disconnect that you want to send to everyone
+	 */
 	private void handleDisconnect(Disconnect disconnect) {
-		server.sendToAll(disconnect);
+		server.sendDisconnectToAll(disconnect);
 		
 	}
 
+	/**
+	 * Sends the passed User class to every connected client
+	 * @param user The User class that is to be sent
+	 */
 	private void handleUser(User user) {
-		UserAccount userAccount = (UserAccount) user;
+		server.sendToAll(user);
 		
 	}
 
+	/**
+	 * Checks the database if the passed ID from LoginUser is stored. Sends
+	 * back to the client a boolean true for an entry existing in the database,
+	 * a false if it does not exist
+	 * @param The account you want checked
+	 */
 	private void handleLogin(LoginUser login) {
 		
 		if(databaseConnection.isUserInDatabase(login)) {
@@ -141,6 +139,10 @@ public class ServerThread extends Thread {
 		
 	}
 
+	/**
+	 * Sends the passed message to all currently connected clients
+	 * @param message The Message class to be sent to all
+	 */
 	private void handleMessage(Message message) {
 		server.sendMessageToAll(message);
 		

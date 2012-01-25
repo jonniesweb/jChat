@@ -10,7 +10,7 @@ public class User extends ID {
 	private String location;
 	private int level;
 
-	public User(final String uuid, final String username, final String realName, final String statusMessage, final byte currentRoomID, final String gender, final String location) {
+	public User(final String uuid, final String username, final String realName, final String statusMessage, int currentRoomID, final String gender, final String location) {
 		super(uuid);
 		
 		if (username.length() != 0) {
@@ -52,6 +52,12 @@ public class User extends ID {
 	
 	public int getLevel() {
 		return level;
+	}
+
+	@Override
+	public String toString() {
+		
+		return username;
 	}
 
 	

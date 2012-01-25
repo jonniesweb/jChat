@@ -20,6 +20,7 @@ import java.awt.Container;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -31,6 +32,7 @@ import java.util.Map;
 import java.util.Random;
 import java.util.logging.Logger;
 
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -42,12 +44,13 @@ import javax.swing.JTextPane;
 import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyledDocument;
 
+import message.Disconnect;
 import message.ID;
 import message.Message;
 import message.User;
 
-import common.ContentContainer;
 import common.DisplayMessage;
+
 
 // extend JFrame so that we can access its methods
 // implement Runnable so that we can have threaded methods
@@ -84,21 +87,25 @@ public class Client extends JFrame implements Runnable {
 
 	// define DisplayMessage to handle object messages
 	private DisplayMessage displayMessage = new DisplayMessage(textPane, document);
-	private ID id;
+	private User user;
 
 	// define the logger
 	private final static Logger log = Logger.getLogger(Client.class.getName());
+	private JPanel userListPanel = new JPanel();
+	private JButton btnAddUserClass;
+	private final JMenu mnHelp = new JMenu("Help");
+	private final JMenuItem mntmAbout = new JMenuItem("About");
 
 
 
 
 
-	public Client(ID id, NetworkConnection networkConnection) {
+	public Client(final User user, final NetworkConnection networkConnection) {
 		// call the superclass constructor and pass it the window title we want
 		// to give, setTitle() could have easily been used
 		super("jChat Client - Created by Jonnie Simpson");
-
-		this.id = id;
+		BorderLayout borderLayout = (BorderLayout) getContentPane().getLayout();
+		this.user = user;
 
 		// when the user enters information in the text box and presses enter
 		// the message is passed to processMessage
@@ -121,6 +128,17 @@ public class Client extends JFrame implements Runnable {
 		textfield.setBackground(new Color(65, 65, 65));
 		setBounds(100, 100, 0, 0);
 
+		// setup adding the ActiveUserList panel to this JFrame
+		getContentPane().add(userListPanel, BorderLayout.EAST);
+		userListPanel.setLayout(new BorderLayout(0, 0));
+		userListPanel.add(new ActiveUserList(), BorderLayout.CENTER);
+
+
+		btnAddUserClass = new JButton("add user class");
+		btnAddUserClass.addActionListener(new BtnAddUserClassActionListener());
+		userListPanel.add(btnAddUserClass, BorderLayout.SOUTH);
+
+
 		// set up the textpane
 		textPane.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		textPane.setForeground(new Color(180, 180, 180));
@@ -139,12 +157,12 @@ public class Client extends JFrame implements Runnable {
 		container.add(textfield, BorderLayout.SOUTH);
 
 		// set the window size
-		setSize(300, 500);
+		setSize(400, 500);
 
+		// set up the menu bar
 		menuBar.setFont(new Font("Segoe UI", Font.PLAIN, 12));
 		menuBar.setForeground(new Color(180, 180, 180));
 		menuBar.setBackground(new Color(65, 65, 65));
-		
 		setJMenuBar(menuBar);
 
 		// menu option "exit" action listener
@@ -152,6 +170,7 @@ public class Client extends JFrame implements Runnable {
 		mntmExit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
+				networkConnection.sendMessage(new Disconnect(user));
 				log.info("Exiting Program via menu");
 				System.exit(0);
 			}
@@ -178,10 +197,9 @@ public class Client extends JFrame implements Runnable {
 		});
 
 		mnFile.add(mntmChangeUsername);
-
 		mnFile.add(mntmExit);
+		mnFile.setForeground(new Color(180, 180, 180));
 
-		menuBar.add(mnMiscellaneous);
 
 		// If the client machine is one belonging to Humberview they
 		// have the ability to play UT2004
@@ -191,10 +209,36 @@ public class Client extends JFrame implements Runnable {
 			}
 		});
 
+		menuBar.add(mnMiscellaneous);
 		mnMiscellaneous.add(mntmPlayUt);
+		mnMiscellaneous.setForeground(new Color(180, 180, 180));
+
+		menuBar.add(mnHelp);
+		mntmAbout.addActionListener(new MntmAboutActionListener());
+
+		mnHelp.add(mntmAbout);
 
 		// show the window
 		setVisible(true);
+		
+		addWindowListener(new java.awt.event.WindowAdapter(){
+
+			public void windowClosing(WindowEvent winEvt) {
+				
+				networkConnection.sendMessage(new Disconnect(user));
+				
+				try {
+					input.close();
+					output.close();
+					socket.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				} finally {
+					System.exit(0);
+				}
+				System.exit(0);
+			}
+		});
 
 		// Initiate the connection
 		this.socket = networkConnection.getSocket();
@@ -209,6 +253,10 @@ public class Client extends JFrame implements Runnable {
 
 		log.info("Connected to: " + networkConnection.getSocket().getInetAddress().getHostName());
 
+		// adds this client to the list
+		networkConnection.sendMessage(user);
+		
+
 		// start this thread in the background
 		new Thread(this).start();
 	}
@@ -220,8 +268,8 @@ public class Client extends JFrame implements Runnable {
 			if (!txtmessage.equals("")) {
 				if ((txtmessage.length() <= 1000)) {
 					// send the message to the server
-					output.writeObject(new Message(id.getStringID(), txtmessage, 0));
-					
+					output.writeObject(new Message(user.getStringID(), txtmessage, 0));
+
 				} else {
 					log.finer("Message is longer than 1000 characters");
 				}
@@ -246,31 +294,50 @@ public class Client extends JFrame implements Runnable {
 
 				try {
 					Object obj = input.readObject();
-					
+
 					if (obj.getClass().getCanonicalName() == Message.class.getCanonicalName()) {
 						Message message = (Message) obj;
-						displayMessage.PrintMessage(message.getMessage());
-						
+						handleMessage(message);
+
 					} else if (obj.getClass().getCanonicalName() == User.class.getCanonicalName()) {
 						User user = (User) obj;
 						UserMap.addUser(user);
-						
+					} else if (obj.getClass().getCanonicalName() == Disconnect.class.getCanonicalName()){
+						handleDisconnect((Disconnect) obj);
 					} else {
 						System.out.println("Unhandled object recieved, dropping object");
 					}
-					
-					
+
+
 				} catch (ClassNotFoundException e) {
 					e.printStackTrace();
 				}
-				
-				
+
+
 
 			}
 		} catch (IOException ioexception) {
 			displayMessage.PrintMessage("Error: " + ioexception);
 			log.warning("IOExecption: " + ioexception);
 		}
+	}
+
+	/**
+	 * Prints the message to the screen by parsing message and looking up the
+	 * usernames
+	 * @param message The message to be printed to the screen
+	 */
+	private void handleMessage(Message message) {
+		displayMessage.PrintMessage(message);
+	}
+
+	/**
+	 * Removes the passed ID from the map of user
+	 * @param obj The ID that you want to remove from the map
+	 */
+	private void handleDisconnect(Disconnect obj) {
+		UserMap.remove(obj);
+
 	}
 
 	private void startUT2004() {
@@ -293,7 +360,7 @@ public class Client extends JFrame implements Runnable {
 	public static void main(String[] args) {
 
 		try {
-			new Client(new ID("testuuid"), new NetworkConnection("testuuid", new Socket("localhost", 1337)));
+			new Client(new User("testid", "testusername", null, null, 0, null, null), new NetworkConnection("testuuid", new Socket("localhost", 1337)));
 		} catch (UnknownHostException e) {
 			log.severe("Failed to connect to server");
 			e.printStackTrace();
@@ -303,5 +370,16 @@ public class Client extends JFrame implements Runnable {
 		}
 		log.info("Attempting to connect to localhost");
 
+	}
+
+	private class BtnAddUserClassActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			ActiveUserList.addUser(new User(new ID("derp").getStringID(), "testusername" + (Math.random()*10), "bob saget", "chilling bro", 0, "horse", "the barn"));
+		}
+	}
+	private class MntmAboutActionListener implements ActionListener {
+		public void actionPerformed(ActionEvent e) {
+			new About();
+		}
 	}
 }

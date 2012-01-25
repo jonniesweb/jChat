@@ -28,13 +28,19 @@ public class UserMap {
 	 */
 	public static void addUser(User user) {
 		map.put(user.getID(), user);
+		ActiveUserList.addUser(user);
 	}
 	
 	/**
-	 * @param user Remove a user object from the map
+	 * @param id Remove an id from the usermap
 	 */
-	public static void removeUser(User user) {
-		map.remove(user.getID());
+	public static void remove(ID id) {
+		map.remove(id.getID());
+		ActiveUserList.removeUser(id);
+	}
+	
+	public static User getUser(ID id) {
+		return map.get(id);
 	}
 	
 }

@@ -10,6 +10,8 @@ import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyledDocument;
 
+import client.UserMap;
+
 import message.Message;
 
 
@@ -41,7 +43,9 @@ public class DisplayMessage {
 		txtmessage.trim();
 		txtmessage += "\n";
 
-		aPrintingMethod(txtmessage);
+		String username = UserMap.getUser(message.getID()).getUsername();
+		
+		aPrintingMethod(username + ": " + txtmessage);
 
 	}
 	
@@ -150,8 +154,6 @@ public class DisplayMessage {
 			} 
 			
 			message.trim();
-			
-			// TODO: handle printing things without a username
 			
 			if(objMessage != null)
 				try {
