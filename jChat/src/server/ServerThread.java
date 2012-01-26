@@ -58,7 +58,7 @@ public class ServerThread extends Thread {
 		start();
 	}
 
-	// get messages from the client and tell Server.java
+	// get messages from the client and tell Server.javaoutputstream
 	public void run() {
 		try {
 
@@ -130,7 +130,6 @@ public class ServerThread extends Thread {
 	 * @param The account you want checked
 	 */
 	private void handleLogin(LoginUser login) {
-		
 		if(databaseConnection.isUserInDatabase(login)) {
 			// temporary
 			userAccount.sendObject(true);

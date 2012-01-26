@@ -79,7 +79,7 @@ public final class Server extends JFrame
 			public void windowClosing(WindowEvent winEvt) {
 
 
-				sendMessageToAll(new Message(id.getStringID(), "The server has shut down", -1));
+				sendMessageToAll(new Message(id.getStringID(), "The server has shut down", -1, "SERVER"));
 
 				try {
 					serversocket.close();
@@ -150,7 +150,7 @@ public final class Server extends JFrame
 			// create a output stream to communicate with the client
 			ObjectOutputStream output = new ObjectOutputStream(socket.getOutputStream());
 
-//			output.flush();
+			output.flush();
 			
 			// put this stream in a hashtable so that it can be referenced quickly
 			UserAccount userAccount = new UserAccount("uuid", "username", "real name", "statusmessage", (byte) 1, "male", "here", "password", output);
@@ -162,7 +162,7 @@ public final class Server extends JFrame
 	}
 
 	// return everything in the hashtable
-	private Enumeration getHashtable() {
+	private Enumeration<UserAccount> getHashtable() {
 		return hashtable.elements();
 	}
 	// take the passed message and send it to all clients

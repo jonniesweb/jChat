@@ -4,8 +4,9 @@ public class Message extends ID {
 
 	private String message;
 	private int roomID;
+	private String username;
 	
-	public Message(final String uuid, final String messageText, final int roomID) {
+	public Message(final String uuid, final String messageText, final int roomID, String username) {
 		super(uuid);
 		
 		if (messageText.length() != 0) {
@@ -15,7 +16,7 @@ public class Message extends ID {
 		}
 		
 			this.roomID = roomID;
-
+			this.username = username;
 	}
 
 	public String getMessage() {
@@ -24,6 +25,10 @@ public class Message extends ID {
 
 	public int getRoomID() {
 		return roomID;
+	}
+	
+	public String getUsername() {
+		return username;
 	}
 
 }

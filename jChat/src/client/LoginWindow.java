@@ -1,6 +1,7 @@
 package client;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
@@ -92,11 +93,15 @@ public class LoginWindow extends JFrame {
 		setBounds(100, 100, 352, 348);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+		contentPane.setBackground(new Color(77, 77, 77));
+		contentPane.setForeground(new Color(180, 180, 180));
 		setContentPane(contentPane);
 		contentPane.setLayout(new BorderLayout(0, 0));
 
 		contentPane.add(panelLogin, BorderLayout.WEST);
 		panelLogin.setLayout(new MigLayout("", "[grow]", "[][][][][][][][]"));
+		panelLogin.setForeground(new Color(180, 180, 180));
+		panelLogin.setBackground(new Color(77, 77, 77));
 		
 		/*
 		 * Action to attempt connecting to the server.
@@ -121,28 +126,40 @@ public class LoginWindow extends JFrame {
 
 		JLabel lblLogin = new JLabel("Login");
 		panelLogin.add(lblLogin, "cell 0 0,alignx left");
+		lblLogin.setForeground(new Color(180, 180, 180));
 		
 		JLabel lblUsername = new JLabel("Username");
 		panelLogin.add(lblUsername, "cell 0 1");
+		lblUsername.setForeground(new Color(180, 180, 180));
 		
 		txtUsername = new JTextField();
 		panelLogin.add(txtUsername, "cell 0 2,growx");
 		txtUsername.setColumns(10);
+		txtUsername.setForeground(new Color(180, 180, 180));
+		txtUsername.setBackground(new Color(77, 77, 77));
 
 		JLabel lblEmail = new JLabel("Email");
 		panelLogin.add(lblEmail, "cell 0 3,alignx left");
+		lblEmail.setForeground(new Color(180, 180, 180));
 
 		txtLoginEmail = new JTextField();
 		panelLogin.add(txtLoginEmail, "cell 0 4,growx");
 		txtLoginEmail.setColumns(10);
+		txtLoginEmail.setForeground(new Color(180, 180, 180));
+		txtLoginEmail.setBackground(new Color(77, 77, 77));
 
 		JLabel lblPassword = new JLabel("Password");
 		panelLogin.add(lblPassword, "cell 0 5,alignx left");
+		lblPassword.setForeground(new Color(180, 180, 180));
 
 		txtLoginPassword = new JPasswordField();
 		panelLogin.add(txtLoginPassword, "cell 0 6,growx");
+		txtLoginPassword.setForeground(new Color(180, 180, 180));
+		txtLoginPassword.setBackground(new Color(77, 77, 77));
 
 		JButton btnLogin = new JButton("Login");
+		btnLogin.setForeground(new Color(180, 180, 180));
+		btnLogin.setBackground(new Color(77, 77, 77));
 		btnLogin.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 
@@ -158,28 +175,40 @@ public class LoginWindow extends JFrame {
 		panelRegister = new JPanel();
 		contentPane.add(panelRegister, BorderLayout.EAST);
 		panelRegister.setLayout(new MigLayout("", "[grow]", "[][][][][][][][][]"));
+		panelRegister.setForeground(new Color(180, 180, 180));
+		panelRegister.setBackground(new Color(77, 77, 77));
 
 		JLabel lblRegister = new JLabel("Register");
 		panelRegister.add(lblRegister, "cell 0 0,alignx right");
+		lblRegister.setForeground(new Color(180, 180, 180));
 
 		JLabel lblEmail_1 = new JLabel("Email");
 		panelRegister.add(lblEmail_1, "cell 0 1,alignx right");
+		lblEmail_1.setForeground(new Color(180, 180, 180));
 
 		txtRegisterEmail = new JTextField();
 		panelRegister.add(txtRegisterEmail, "cell 0 2,growx");
 		txtRegisterEmail.setColumns(10);
+		txtRegisterEmail.setForeground(new Color(180, 180, 180));
+		txtRegisterEmail.setBackground(new Color(77, 77, 77));
 
 		JLabel lblPassword_1 = new JLabel("Password");
 		panelRegister.add(lblPassword_1, "cell 0 3,alignx right");
+		lblPassword_1.setForeground(new Color(180, 180, 180));
 
 		txtRegisterPassword = new JPasswordField();
 		panelRegister.add(txtRegisterPassword, "cell 0 4,growx");
+		txtRegisterEmail.setForeground(new Color(180, 180, 180));
+		txtRegisterPassword.setBackground(new Color(77, 77, 77));
 
 		JLabel lblReenterPassword = new JLabel("Verify Password");
 		panelRegister.add(lblReenterPassword, "cell 0 5,alignx right");
+		lblReenterPassword.setForeground(new Color(180, 180, 180));
 
 		txtRegisterPassword2 = new JPasswordField();
 		panelRegister.add(txtRegisterPassword2, "cell 0 6,growx");
+		txtRegisterPassword2.setForeground(new Color(180, 180, 180));
+		txtRegisterPassword2.setBackground(new Color(77, 77, 77));
 
 		JButton btnRegister = new JButton("Register");
 		btnRegister.addActionListener(new ActionListener() {
@@ -191,25 +220,34 @@ public class LoginWindow extends JFrame {
 			}
 		});
 		panelRegister.add(btnRegister, "cell 0 7");
+		btnRegister.setForeground(new Color(180, 180, 180));
+		btnRegister.setBackground(new Color(77, 77, 77));
 
 		contentPane.add(panelConnect, BorderLayout.NORTH);
 		panelConnect.setLayout(new MigLayout("", "[][grow][]", "[15px][][]"));
+		panelConnect.setForeground(new Color(180, 180, 180));
+		panelConnect.setBackground(new Color(77, 77, 77));
 
 		JLabel lblJchat = new JLabel("jChat - By Jonnie Simpson");
 		panelConnect.add(lblJchat, "cell 0 0 3 1,alignx center,aligny top");
 		lblJchat.setHorizontalAlignment(SwingConstants.CENTER);
+		lblJchat.setForeground(new Color(180, 180, 180));
 
 		JLabel lblServerIp = new JLabel("Server IP");
 		panelConnect.add(lblServerIp, "cell 0 1,alignx trailing");
+		lblServerIp.setForeground(new Color(180, 180, 180));
 
 		txtIPAddress = new JTextField();
 		txtIPAddress.addActionListener(connectToServerAction);
 		panelConnect.add(txtIPAddress, "cell 1 1");
 		txtIPAddress.setColumns(12);
+		txtIPAddress.setForeground(new Color(180, 180, 180));
+		txtIPAddress.setBackground(new Color(77, 77, 77));
 
 		btnConnect = new JButton("Connect");
-
 		btnConnect.addActionListener(connectToServerAction);
+		btnConnect.setForeground(new Color(180, 180, 180));
+		btnConnect.setBackground(new Color(77, 77, 77));
 		panelConnect.add(btnConnect, "cell 2 1");
 		
 		panelConnect.add(lblStatus, "cell 0 2 3 1,alignx center");
@@ -217,7 +255,7 @@ public class LoginWindow extends JFrame {
 		pack();
 
 		setLoginEnabled(false);
-		setRegisterEnabled(false);
+		setRegisterEnabled(true);
 
 	}
 	
@@ -286,7 +324,7 @@ public class LoginWindow extends JFrame {
 		passwordHash = MD5.generateMD5(String.valueOf(password));
 		
 		// create a Login message to send to the server
-		LoginUser loginUser = new LoginUser(emailAddress, passwordHash);
+		LoginUser loginUser = new LoginUser(emailAddress, passwordHash, txtUsername.getText());
 		networkConnection.sendMessage(loginUser);
 		boolean result = getLoginResponse();
 		
@@ -309,11 +347,9 @@ public class LoginWindow extends JFrame {
 			boolean result = (Boolean) networkConnection.getInputStream().readObject();
 			return result;
 		} catch (IOException e) {
-			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
 		}
-		return false;
+		return true;
 	}
 
 	/**

@@ -6,8 +6,9 @@ public class LoginUser implements Serializable {
 	
 	private String email;
 	private String hashPassword;
+	private String username;
 
-	public LoginUser(String email, String hashPassword) {
+	public LoginUser(String email, String hashPassword, String username) {
 		
 		if (email.length() != 0) {
 			this.email = email;
@@ -21,6 +22,7 @@ public class LoginUser implements Serializable {
 			throw new IllegalArgumentException("Password hash must be greater than one character!");
 		}
 		
+		this.username = username;
 	}
 
 	public String getEmail() {
@@ -29,6 +31,11 @@ public class LoginUser implements Serializable {
 
 	public String getHashPassword() {
 		return hashPassword;
+	}
+	
+	public String getUsername() {
+		
+		return username;
 	}
 
 }

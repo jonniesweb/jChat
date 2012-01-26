@@ -1,5 +1,7 @@
 package client;
 
+import java.awt.Color;
+
 import javax.swing.JPanel;
 
 import message.ID;
@@ -23,13 +25,11 @@ public class ActiveUserList extends JPanel {
 		scrollPane = new JScrollPane();
 		scrollPane.setEnabled(false);
 		add(scrollPane, "cell 0 0,grow");
+		setBackground(new Color(77, 77, 77));
+		setForeground(new Color(180, 180, 180));
 
 		table = new JTable(new DefaultTableModel(
-			new Object[][] {
-				{"user1"},
-				{"derpuser2"},
-				{"user3"},
-			},
+			new Object[][] {},
 			new String[] {
 				"Userlist"
 			}
@@ -42,6 +42,9 @@ public class ActiveUserList extends JPanel {
 			}
 		});
 		
+		table.setForeground(new Color(180, 180, 180));
+		table.setBackground(new Color(77, 77, 77));
+		
 		// implement sorting of the list
 		table.setAutoCreateRowSorter(true);
 		
@@ -51,8 +54,6 @@ public class ActiveUserList extends JPanel {
 		scrollPane.setViewportView(table);
 		table.setFillsViewportHeight(true);
 		
-		model.insertRow(0, new String[] {"derptestusername"});
-		model.insertRow(0, new Object[] {new User("testuuid", "testusername", "real_name", "love being alive", 0, "transgendered", "bolton")});
 	}
 
 	public static void addUser(User user) {

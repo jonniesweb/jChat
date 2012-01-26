@@ -42,8 +42,9 @@ public class DisplayMessage {
 		String txtmessage = message.getMessage();
 		txtmessage.trim();
 		txtmessage += "\n";
-
-		String username = UserMap.getUser(message.getID()).getUsername();
+		
+		String username = message.getUsername();
+		
 		
 		aPrintingMethod(username + ": " + txtmessage);
 

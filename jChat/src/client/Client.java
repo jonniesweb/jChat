@@ -88,11 +88,11 @@ public class Client extends JFrame implements Runnable {
 	// define DisplayMessage to handle object messages
 	private DisplayMessage displayMessage = new DisplayMessage(textPane, document);
 	private User user;
+	private About about = new About();
 
 	// define the logger
 	private final static Logger log = Logger.getLogger(Client.class.getName());
 	private JPanel userListPanel = new JPanel();
-	private JButton btnAddUserClass;
 	private final JMenu mnHelp = new JMenu("Help");
 	private final JMenuItem mntmAbout = new JMenuItem("About");
 
@@ -106,6 +106,7 @@ public class Client extends JFrame implements Runnable {
 		super("jChat Client - Created by Jonnie Simpson");
 		BorderLayout borderLayout = (BorderLayout) getContentPane().getLayout();
 		this.user = user;
+		this.username = user.getUsername();
 
 		// when the user enters information in the text box and presses enter
 		// the message is passed to processMessage
@@ -132,11 +133,6 @@ public class Client extends JFrame implements Runnable {
 		getContentPane().add(userListPanel, BorderLayout.EAST);
 		userListPanel.setLayout(new BorderLayout(0, 0));
 		userListPanel.add(new ActiveUserList(), BorderLayout.CENTER);
-
-
-		btnAddUserClass = new JButton("add user class");
-		btnAddUserClass.addActionListener(new BtnAddUserClassActionListener());
-		userListPanel.add(btnAddUserClass, BorderLayout.SOUTH);
 
 
 		// set up the textpane
@@ -175,11 +171,14 @@ public class Client extends JFrame implements Runnable {
 				System.exit(0);
 			}
 		});
+		mntmExit.setForeground(new Color(180, 180, 180));
+		mntmExit.setBackground(new Color(77, 77, 77));
 
 		final ActionListener actionUsernameSubmit = new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				username = inputBox.getTextField();
+				user.setUsername(inputBox.getTextField());
 				inputBox.dispose();
 				log.info("Set username to: " + username);
 			}
@@ -195,6 +194,8 @@ public class Client extends JFrame implements Runnable {
 
 			}
 		});
+		mntmChangeUsername.setForeground(new Color(180, 180, 180));
+		mntmChangeUsername.setBackground(new Color(77, 77, 77));
 
 		mnFile.add(mntmChangeUsername);
 		mnFile.add(mntmExit);
@@ -208,14 +209,18 @@ public class Client extends JFrame implements Runnable {
 				startUT2004();
 			}
 		});
+		mntmPlayUt.setForeground(new Color(180, 180, 180));
+		mntmPlayUt.setBackground(new Color(77, 77, 77));
 
 		menuBar.add(mnMiscellaneous);
 		mnMiscellaneous.add(mntmPlayUt);
 		mnMiscellaneous.setForeground(new Color(180, 180, 180));
 
 		menuBar.add(mnHelp);
+		mnHelp.setForeground(new Color(180, 180, 180));
 		mntmAbout.addActionListener(new MntmAboutActionListener());
-
+		mntmAbout.setForeground(new Color(180, 180, 180));
+		mntmAbout.setBackground(new Color(77, 77, 77));
 		mnHelp.add(mntmAbout);
 
 		// show the window
@@ -268,7 +273,7 @@ public class Client extends JFrame implements Runnable {
 			if (!txtmessage.equals("")) {
 				if ((txtmessage.length() <= 1000)) {
 					// send the message to the server
-					output.writeObject(new Message(user.getStringID(), txtmessage, 0));
+					output.writeObject(new Message(user.getStringID(), txtmessage, 0, username));
 
 				} else {
 					log.finer("Message is longer than 1000 characters");
@@ -371,15 +376,9 @@ public class Client extends JFrame implements Runnable {
 		log.info("Attempting to connect to localhost");
 
 	}
-
-	private class BtnAddUserClassActionListener implements ActionListener {
-		public void actionPerformed(ActionEvent e) {
-			ActiveUserList.addUser(new User(new ID("derp").getStringID(), "testusername" + (Math.random()*10), "bob saget", "chilling bro", 0, "horse", "the barn"));
-		}
-	}
 	private class MntmAboutActionListener implements ActionListener {
 		public void actionPerformed(ActionEvent e) {
-			new About();
+			about.setVisible(true);
 		}
 	}
 }

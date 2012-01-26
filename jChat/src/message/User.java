@@ -60,5 +60,10 @@ public class User extends ID {
 		return username;
 	}
 
+	public void setUsername(String string) {
+		this.username = string;
+		
+	}
+
 	
 }

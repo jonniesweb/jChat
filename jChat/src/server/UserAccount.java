@@ -37,5 +37,9 @@ public class UserAccount extends User {
 		}
 	}
 	
+	public void setOutputStream(ObjectOutputStream outputstream) {
+		this.outputstream = outputstream;
+	}
+	
 
 }

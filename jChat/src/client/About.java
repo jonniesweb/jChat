@@ -56,23 +56,31 @@ public class About extends JFrame {
 	 * Create the frame.
 	 */
 	public About() {
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setBounds(100, 100, 300, 300);
+		super("About JChat");
+		setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
+		setBounds(100, 100, 325, 325);
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setLayout(new BorderLayout(0, 0));
 		setContentPane(contentPane);
+		contentPane.setBackground(new Color(77, 77, 77));
+		contentPane.setForeground(new Color(180, 180, 180));
 
 		lblAbout = new JLabel("About");
 		lblAbout.setFont(new Font("Dialog", Font.BOLD, 24));
 		lblAbout.setHorizontalAlignment(SwingConstants.CENTER);
 		contentPane.add(lblAbout, BorderLayout.NORTH);
+		lblAbout.setBackground(new Color(77, 77, 77));
+		lblAbout.setForeground(new Color(180, 180, 180));
 
 		scrollPane = new JScrollPane();
 		contentPane.add(scrollPane, BorderLayout.CENTER);
+		scrollPane.setBackground(new Color(77, 77, 77));
+		scrollPane.setForeground(new Color(180, 180, 180));
 
 		textPane = new JTextPane(document);
 		scrollPane.setViewportView(textPane);
+		textPane.setEditable(false);
 
 
 		playCredits();
@@ -116,7 +124,7 @@ public class About extends JFrame {
 		pt("Zombie Apocalypse Preacher");
 		pt("Forever-Going-To-Miss-Byers");
 		
-		
+		textPane.setCaretPosition(0);
 		
 		
 
